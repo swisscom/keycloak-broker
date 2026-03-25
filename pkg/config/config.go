@@ -12,6 +12,11 @@ type Config struct {
 	Password     string
 	LogLevel     string
 	LogTimestamp bool
+
+	KeycloakURL      string
+	KeycloakRealm    string
+	KeycloakAdmin    string
+	KeycloakPassword string
 }
 
 var (
@@ -40,11 +45,15 @@ func load() *Config {
 	}
 
 	return &Config{
-		Port:         port,
-		Username:     getEnvOrDefault("BROKER_USERNAME", ""),
-		Password:     getEnvOrDefault("BROKER_PASSWORD", ""),
-		LogLevel:     getEnvOrDefault("BROKER_LOG_LEVEL", "info"),
-		LogTimestamp: logTimestamp,
+		Port:             port,
+		Username:         getEnvOrDefault("BROKER_USERNAME", ""),
+		Password:         getEnvOrDefault("BROKER_PASSWORD", ""),
+		LogLevel:         getEnvOrDefault("BROKER_LOG_LEVEL", "info"),
+		LogTimestamp:     logTimestamp,
+		KeycloakURL:      getEnvOrDefault("KEYCLOAK_URL", "http://localhost:8080"),
+		KeycloakRealm:    getEnvOrDefault("KEYCLOAK_REALM", ""),
+		KeycloakAdmin:    getEnvOrDefault("KEYCLOAK_ADMIN", ""),
+		KeycloakPassword: getEnvOrDefault("KEYCLOAK_PASSWORD", ""),
 	}
 }
 

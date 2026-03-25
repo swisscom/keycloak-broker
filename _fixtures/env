@@ -4,3 +4,8 @@ export BROKER_LOG_LEVEL="debug"
 export BROKER_LOG_TIMESTAMP=true
 export BROKER_USERNAME="disco"
 export BROKER_PASSWORD="dingo"
+
+export KEYCLOAK_URL="http://localhost:8080"
+export KEYCLOAK_REALM="dev-realm"
+export KEYCLOAK_ADMIN="admin"
+export KEYCLOAK_PASSWORD="super-secret-admin-password"

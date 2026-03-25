@@ -62,3 +62,16 @@ func init() {
 func GetCatalog() map[string]any {
 	return map[string]any{"services": catalog.Services}
 }
+
+func IsPlanPublic(serviceID, planID string) bool {
+	for _, svc := range catalog.Services {
+		if svc.ID == serviceID {
+			for _, p := range svc.Plans {
+				if p.ID == planID {
+					return p.Metadata.Public
+				}
+			}
+		}
+	}
+	return false
+}

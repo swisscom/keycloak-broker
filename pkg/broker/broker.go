@@ -2,9 +2,8 @@ package broker
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/keycloak-broker/pkg/catalog"
 	"github.com/keycloak-broker/pkg/keycloak"
@@ -54,10 +53,17 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	// TODO: provision OIDC client in keycloak
+	public := catalog.IsPlanPublic(req.ServiceID, req.PlanID)
+	_, err := b.client.CreateClient(context.Background(), instanceId, public)
+	if err != nil {
+		logger.Error("failed to provision instance_id [%s]: %v", instanceId, err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	// TODO: check if instance_id already exists, if yes then return HTTP Status 200 according to spec
 
 	logger.Info("instance_id [%s] provisioned", instanceId)
-	return c.JSON(http.StatusAccepted, map[string]any{}) // TODO: verify return status according to OSB spec
+	return c.JSON(http.StatusCreated, map[string]any{})
 }
 
 func (b *Broker) GetInstance(c echo.Context) error {
@@ -70,13 +76,12 @@ func (b *Broker) GetInstance(c echo.Context) error {
 	logger.Debug("checking instance_id [%s]", instanceId)
 	client, err := b.client.GetClient(context.Background(), instanceId)
 	if err != nil {
-		if strings.Contains(err.Error(), fmt.Sprintf("\"%s\" not found", instanceId)) {
+		if errors.Is(err, keycloak.ErrNotFound) {
 			logger.Debug("instance_id [%s] not found", instanceId)
 			return c.JSON(http.StatusNotFound, map[string]any{})
-		} else {
-			logger.Error("failed to get instance %s: %v", instanceId, err)
-			return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		}
+		logger.Error("failed to get instance_id [%s]: %v", instanceId, err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	return c.JSON(http.StatusOK, client)
 }
@@ -91,12 +96,16 @@ func (b *Broker) DeprovisionInstance(c echo.Context) error {
 	logger.Info("deprovision instance_id [%s]", instanceId)
 	err := b.client.DeleteClient(context.Background(), instanceId)
 	if err != nil {
+		if errors.Is(err, keycloak.ErrNotFound) {
+			logger.Debug("instance_id [%s] not found, already gone", instanceId)
+			return c.JSON(http.StatusGone, map[string]any{})
+		}
 		logger.Error("failed to deprovision instance_id [%s]: %v", instanceId, err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
 	logger.Info("deprovisioned instance_id [%s]", instanceId)
-	return c.JSON(http.StatusAccepted, map[string]any{}) // TODO: verify return status according to OSB spec
+	return c.JSON(http.StatusOK, map[string]any{})
 }
 
 func (b *Broker) BindInstance(c echo.Context) error {
