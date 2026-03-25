@@ -35,9 +35,14 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 	}
 
 	var req struct {
-		ServiceID string         `json:"service_id"`
-		PlanID    string         `json:"plan_id"`
-		Context   map[string]any `json:"context"`
+		ServiceID  string         `json:"service_id"`
+		PlanID     string         `json:"plan_id"`
+		Context    map[string]any `json:"context"`
+		Parameters struct {
+			PublicClient        bool     `json:"public_client"`
+			RedirectURIs        []string `json:"redirect_uris"`
+			ImplicitFlowEnabled bool     `json:"implicit_flow_enabled"`
+		} `json:"parameters"`
 	}
 	if err := c.Bind(&req); err != nil {
 		logger.Error("failed to parse provision request for instance_id [%s]: %v", instanceId, err)
@@ -53,17 +58,34 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	public := catalog.IsPlanPublic(req.ServiceID, req.PlanID)
-	_, err := b.client.CreateClient(context.Background(), instanceId, public)
+	// check first if instance_id already exists
+	logger.Debug("checking if instance_id [%s] exists", instanceId)
+	client, err := b.client.GetClient(context.Background(), instanceId)
+	if err != nil {
+		if !errors.Is(err, keycloak.ErrNotFound) {
+			logger.Error("failed to get instance_id [%s]: %v", instanceId, err)
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		}
+	}
+	if client != nil && client.ClientID == instanceId {
+		logger.Info("instance_id [%s] already exists", instanceId)
+		return c.JSON(http.StatusOK, keycloakClientToOSB(client))
+	}
+
+	client, err = b.client.CreateClient(context.Background(),
+		instanceId, req.ServiceID, req.PlanID,
+		&keycloak.OIDCClientParameters{
+			PublicClient:        req.Parameters.PublicClient,
+			RedirectURIs:        req.Parameters.RedirectURIs,
+			ImplicitFlowEnabled: req.Parameters.ImplicitFlowEnabled,
+		})
 	if err != nil {
 		logger.Error("failed to provision instance_id [%s]: %v", instanceId, err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	// TODO: check if instance_id already exists, if yes then return HTTP Status 200 according to spec
-
 	logger.Info("instance_id [%s] provisioned", instanceId)
-	return c.JSON(http.StatusCreated, map[string]any{})
+	return c.JSON(http.StatusCreated, keycloakClientToOSB(client))
 }
 
 func (b *Broker) GetInstance(c echo.Context) error {
@@ -73,7 +95,7 @@ func (b *Broker) GetInstance(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	logger.Debug("checking instance_id [%s]", instanceId)
+	logger.Debug("checking if instance_id [%s] exists", instanceId)
 	client, err := b.client.GetClient(context.Background(), instanceId)
 	if err != nil {
 		if errors.Is(err, keycloak.ErrNotFound) {
