@@ -1,0 +1,34 @@
+services:
+- id: fff5b36a-da19-4dc2-bd28-3dd331146290
+  name: corpid
+  description: CorpID - OIDC-as-a-Service
+  bindable: true
+  instances_retrievable: true
+  bindings_retrievable: true
+  plan_updateable: false
+  tags:
+  - corpid
+  - oidc
+  - oauth2
+  - idp
+  metadata:
+    displayName: CorpID - OIDC-as-a-Service
+    imageUrl: https://xyz/logo.png
+    longDescription: CorpID - OIDC-as-a-Service
+    providerDisplayName: CorpID
+    documentationUrl: https://xyz
+    supportUrl: https://xyz
+  plans:
+  - id: 40627d0f-dedd-4d68-8111-2ebae510ba1b
+    name: standard-client
+    description: standard OIDC client
+    free: false
+    metadata:
+      flow: xyz
+  - id: ece8f4ad-1ba0-481b-94b0-8fb4f066aa38
+    name: public-client
+    description: public OIDC client
+    free: false
+    metadata:
+      flow: xyz
+      public: true
