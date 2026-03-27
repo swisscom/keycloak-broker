@@ -91,6 +91,11 @@ docker-cleanup:
 	docker system prune --volumes -a
 
 #=======================================================================================================================
+.PHONY: health-check
+## health-check: check broker health endpoint
+health-check:
+	curl -v http://localhost:9999/health
+
 .PHONY: provision
 ## provision: creates an example service instance
 provision:

@@ -100,3 +100,31 @@ func (c *Client) getEndpoints(ctx context.Context) (*OIDCDiscoveryResponse, erro
 	c.discovery = &discovery
 	return c.discovery, nil
 }
+
+// HealthCheck verifies realm availability via admin login.
+func (c *Client) HealthCheck(ctx context.Context) error {
+	token, err := c.getToken(ctx)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet,
+		fmt.Sprintf("%s/realms/%s", c.baseURL, c.realm),
+		nil)
+	if err != nil {
+		return fmt.Errorf("build get request: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("get realm: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		respBody, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("get realm for health check failed (%d): %s", resp.StatusCode, respBody)
+	}
+	return nil
+}
