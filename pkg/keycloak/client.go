@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/keycloak-broker/pkg/catalog"
 	"github.com/keycloak-broker/pkg/config"
 	"github.com/keycloak-broker/pkg/logger"
 )
@@ -46,18 +47,25 @@ func (c *Client) CreateClient(ctx context.Context, instanceId, serviceId, planId
 		return nil, err
 	}
 
+	// store service_id and plan_id inside client attributes in Keycloak
+	attributes := make(map[string]string)
+	attributes["service_id"] = serviceId
+	attributes["plan_id"] = planId
+
 	oidc := OIDCClientPayload{
-		ClientID:                  instanceId,
+		ClientId:                  instanceId,
 		Name:                      instanceId,
-		Description:               fmt.Sprintf("%s;%s", serviceId, planId),
+		Description:               catalog.GetPlan(serviceId, planId).Description,
 		Enabled:                   true,
 		Protocol:                  "openid-connect",
 		PublicClient:              paramaters.PublicClient,
 		RedirectURIs:              paramaters.RedirectURIs,
+		ConsentRequired:           paramaters.ConsentRequired,
 		StandardFlowEnabled:       true,
 		ImplicitFlowEnabled:       paramaters.ImplicitFlowEnabled,
 		DirectAccessGrantsEnabled: false,
 		ServiceAccountsEnabled:    false,
+		Attributes:                attributes,
 	}
 	body, err := json.Marshal(oidc)
 	if err != nil {
@@ -123,7 +131,7 @@ func (c *Client) GetClient(ctx context.Context, instanceId string) (*OIDCClientR
 	}
 
 	for _, cl := range clients {
-		if cl.ClientID == instanceId {
+		if cl.ClientId == instanceId {
 			return &cl, nil
 		}
 	}
@@ -144,7 +152,7 @@ func (c *Client) DeleteClient(ctx context.Context, instanceId string) error {
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete,
-		fmt.Sprintf("%s/admin/realms/%s/clients/%s", c.baseURL, c.realm, oidc.ID),
+		fmt.Sprintf("%s/admin/realms/%s/clients/%s", c.baseURL, c.realm, oidc.Id),
 		nil)
 	if err != nil {
 		return fmt.Errorf("build delete request: %w", err)

@@ -96,7 +96,7 @@ docker-cleanup:
 provision:
 	curl -v http://disco:dingo@localhost:9999/v2/service_instances/fe5556b9-8478-409b-ab2b-3c95ba06c5fc \
 		-X PUT -H "Content-Type: application/json" \
-		-d '{ "service_id":"fff5b36a-da19-4dc2-bd28-3dd331146290", "plan_id":"40627d0f-dedd-4d68-8111-2ebae510ba1b" }' \
+		-d '{ "service_id":"fff5b36a-da19-4dc2-bd28-3dd331146290", "plan_id":"40627d0f-dedd-4d68-8111-2ebae510ba1b", "parameters": { "redirect_uris": ["https://myapp.example.com/callback"] } }' \
 		| jq .
 
 .PHONY: fetch-instance

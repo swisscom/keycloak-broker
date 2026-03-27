@@ -39,13 +39,12 @@ type Plan struct {
 	ID          string       `yaml:"id" json:"id"`
 	Name        string       `yaml:"name" json:"name"`
 	Description string       `yaml:"description" json:"description"`
-	Free        bool         `yaml:"free" json:"free"`
+	Free        bool         `yaml:"free" json:"free,omitempty"`
 	Metadata    PlanMetadata `yaml:"metadata" json:"metadata"`
 }
 
 type PlanMetadata struct {
-	Flow              string `yaml:"flow" json:"flow"`
-	Public              bool   `yaml:"public" json:"public"`
+	PublicClient        bool `yaml:"publicClient" json:"publicClient,omitempty"`
 }
 
 func init() {
@@ -63,15 +62,28 @@ func GetCatalog() map[string]any {
 	return map[string]any{"services": catalog.Services}
 }
 
-func IsPlanPublic(serviceID, planID string) bool {
+func IsPublicClient(serviceID, planID string) bool {
 	for _, svc := range catalog.Services {
 		if svc.ID == serviceID {
 			for _, p := range svc.Plans {
 				if p.ID == planID {
-					return p.Metadata.Public
+					return p.Metadata.PublicClient
 				}
 			}
 		}
 	}
 	return false
+}
+
+func GetPlan(serviceID, planID string) Plan {
+	for _, svc := range catalog.Services {
+		if svc.ID == serviceID {
+			for _, p := range svc.Plans {
+				if p.ID == planID {
+					return p
+				}
+			}
+		}
+	}
+	return Plan{}
 }

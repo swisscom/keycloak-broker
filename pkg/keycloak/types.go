@@ -2,45 +2,51 @@ package keycloak
 
 // OIDCClientParameters represents Keycloak OIDC client parameters
 type OIDCClientParameters struct {
-	PublicClient              bool     `json:"public_client"`
-	RedirectURIs              []string `json:"redirect_uris"`
-	ImplicitFlowEnabled       bool     `json:"implicit_flow_enabled"`
+	RedirectURIs        []string          `json:"redirectUris"`
+	PublicClient        bool              `json:"publicClient"`
+	ConsentRequired     bool              `json:"consentRequired"`
+	ImplicitFlowEnabled bool              `json:"implicitFlowEnabled"`
+	Attributes          map[string]string `json:"attributes,omitempty"`
 }
 
 // OIDCClientPayload represents a Keycloak OIDC client payload for the admin API.
 type OIDCClientPayload struct {
-	ClientID                  string   `json:"clientId"`
-	Name                      string   `json:"name"`
-	Description               string   `json:"description"`
-	Enabled                   bool     `json:"enabled"`
-	Protocol                  string   `json:"protocol"`
-	PublicClient              bool     `json:"publicClient"`
-	RedirectURIs              []string `json:"redirectUris"`
-	StandardFlowEnabled       bool     `json:"standardFlowEnabled"`
-	ImplicitFlowEnabled       bool     `json:"implicitFlowEnabled"`
-	DirectAccessGrantsEnabled bool     `json:"directAccessGrantsEnabled"`
-	ServiceAccountsEnabled    bool     `json:"serviceAccountsEnabled"`
+	ClientId                  string            `json:"clientId"`
+	Name                      string            `json:"name"`
+	Description               string            `json:"description"`
+	Enabled                   bool              `json:"enabled"`
+	Protocol                  string            `json:"protocol"`
+	PublicClient              bool              `json:"publicClient"`
+	RedirectURIs              []string          `json:"redirectUris"`
+	ConsentRequired           bool              `json:"consentRequired"`
+	StandardFlowEnabled       bool              `json:"standardFlowEnabled"`
+	ImplicitFlowEnabled       bool              `json:"implicitFlowEnabled"`
+	DirectAccessGrantsEnabled bool              `json:"directAccessGrantsEnabled"`
+	ServiceAccountsEnabled    bool              `json:"serviceAccountsEnabled"`
+	Attributes                map[string]string `json:"attributes,omitempty"`
 }
 
 // OIDCClientResponse represents a Keycloak OIDC client response.
 type OIDCClientResponse struct {
-	ID                        string   `json:"id,omitempty"` // internal UUID
-	ClientID                  string   `json:"clientId,omitempty"`
-	Name                      string   `json:"name,omitempty"`
-	Description               string   `json:"description,omitempty"`
-	SurrogateAuthRequired     bool     `json:"surrogateAuthRequired"`
-	Enabled                   bool     `json:"enabled"`
-	AlwaysDisplayInConsole    bool     `json:"alwaysDisplayInConsole"`
-	ClientAuthenticatorType   string   `json:"clientAuthenticatorType,omitempty"`
-	Secret                    string   `json:"secret,omitempty"`
-	Protocol                  string   `json:"protocol,omitempty"`
-	PublicClient              bool     `json:"publicClient"`
-	RedirectURIs              []string `json:"redirectUris,omitempty"`
-	WebOrigins                []string `json:"webOrigins,omitempty"`
-	StandardFlowEnabled       bool     `json:"standardFlowEnabled"`
-	ImplicitFlowEnabled       bool     `json:"implicitFlowEnabled"`
-	DirectAccessGrantsEnabled bool     `json:"directAccessGrantsEnabled"`
-	ServiceAccountsEnabled    bool     `json:"serviceAccountsEnabled"`
+	Id                        string            `json:"id"` // internal UUID
+	ClientId                  string            `json:"clientId"`
+	Name                      string            `json:"name"`
+	Description               string            `json:"description"`
+	SurrogateAuthRequired     bool              `json:"surrogateAuthRequired"`
+	Enabled                   bool              `json:"enabled"`
+	AlwaysDisplayInConsole    bool              `json:"alwaysDisplayInConsole"`
+	ClientAuthenticatorType   string            `json:"clientAuthenticatorType"`
+	Secret                    string            `json:"secret"`
+	Protocol                  string            `json:"protocol"`
+	PublicClient              bool              `json:"publicClient"`
+	RedirectURIs              []string          `json:"redirectUris"`
+	WebOrigins                []string          `json:"webOrigins"`
+	ConsentRequired           bool              `json:"consentRequired"`
+	StandardFlowEnabled       bool              `json:"standardFlowEnabled"`
+	ImplicitFlowEnabled       bool              `json:"implicitFlowEnabled"`
+	DirectAccessGrantsEnabled bool              `json:"directAccessGrantsEnabled"`
+	ServiceAccountsEnabled    bool              `json:"serviceAccountsEnabled"`
+	Attributes                map[string]string `json:"attributes"`
 }
 
 /*

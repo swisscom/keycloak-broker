@@ -2,22 +2,25 @@ package broker
 
 // OSBClientResponse represents an OSB API response of a client service instance.
 type OSBClientResponse struct {
-	ServiceID  string                      `json:"service_id"`
-	PlanID     string                      `json:"plan_id"`
+	ServiceId  string                      `json:"serviceId"`
+	PlanId     string                      `json:"planId"`
 	Parameters OSBClientResponseParameters `json:"parameters"`
 }
 type OSBClientResponseParameters struct {
-	ClientID                  string   `json:"client_id"`
-	ClientSecret              string   `json:"client_secret"`
-	Protocol                  string   `json:"protocol"`
-	PublicClient              bool     `json:"public_client,omitempty"`
-	ClientAuthenticatorType   string   `json:"clientAuthenticatorType,omitempty"`
-	RedirectURIs              []string `json:"redirect_uris"`
-	WebOrigins                []string `json:"web_origins,omitempty"`
-	StandardFlowEnabled       bool     `json:"standard_flow_enabled,omitempty"`
-	ImplicitFlowEnabled       bool     `json:"implicit_flow_enabled,omitempty"`
-	DirectAccessGrantsEnabled bool     `json:"direct_access_grants_enabled,omitempty"`
-	ServiceAccountsEnabled    bool     `json:"service_accounts_enabled,omitempty"`
+	ClientId                  string            `json:"clientId"`
+	ClientSecret              string            `json:"clientSecret"`
+	Description               string            `json:"description"`
+	Protocol                  string            `json:"protocol"`
+	PublicClient              bool              `json:"publicClient,omitempty"`
+	ClientAuthenticatorType   string            `json:"clientAuthenticatorType,omitempty"`
+	RedirectURIs              []string          `json:"redirectURIs"`
+	WebOrigins                []string          `json:"webOrigins,omitempty"`
+	ConsentRequired           bool              `json:"consentRequired,omitempty"`
+	StandardFlowEnabled       bool              `json:"standardFlowEnabled,omitempty"`
+	ImplicitFlowEnabled       bool              `json:"implicitFlowEnabled,omitempty"`
+	DirectAccessGrantsEnabled bool              `json:"directAccessGrantsEnabled,omitempty"`
+	ServiceAccountsEnabled    bool              `json:"serviceAccountsEnabled,omitempty"`
+	Attributes                map[string]string `json:"attributes,omitempty"`
 }
 
 // OSBBindingResponse represents an OSB API response of a service instance binding.

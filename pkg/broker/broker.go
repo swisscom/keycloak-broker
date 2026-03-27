@@ -34,28 +34,30 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
+	// read in request parameters
 	var req struct {
 		ServiceID  string         `json:"service_id"`
 		PlanID     string         `json:"plan_id"`
 		Context    map[string]any `json:"context"`
 		Parameters struct {
-			PublicClient        bool     `json:"public_client"`
 			RedirectURIs        []string `json:"redirect_uris"`
 			ImplicitFlowEnabled bool     `json:"implicit_flow_enabled"`
+			ConsentRequired     bool     `json:"consent_required"`
 		} `json:"parameters"`
 	}
 	if err := c.Bind(&req); err != nil {
 		logger.Error("failed to parse provision request for instance_id [%s]: %v", instanceId, err)
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "payload", "description": err.Error()})
 	}
 
+	// validate service and plan IDs
 	if err := validation.ValidateServiceID(req.ServiceID); err != nil {
 		logger.Warn("invalid service_id [%s] for %s: %v", req.ServiceID, instanceId, err)
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "validation", "description": err.Error()})
 	}
 	if err := validation.ValidatePlanID(req.ServiceID, req.PlanID); err != nil {
 		logger.Warn("invalid plan_id [%s] for %s: %v", req.PlanID, instanceId, err)
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "validation", "description": err.Error()})
 	}
 
 	// check first if instance_id already exists
@@ -67,7 +69,7 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		}
 	}
-	if client != nil && client.ClientID == instanceId {
+	if client != nil && client.ClientId == instanceId {
 		logger.Info("instance_id [%s] already exists", instanceId)
 		return c.JSON(http.StatusOK, keycloakClientToOSB(client))
 	}
@@ -75,9 +77,10 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 	client, err = b.client.CreateClient(context.Background(),
 		instanceId, req.ServiceID, req.PlanID,
 		&keycloak.OIDCClientParameters{
-			PublicClient:        req.Parameters.PublicClient,
 			RedirectURIs:        req.Parameters.RedirectURIs,
+			PublicClient:        catalog.IsPublicClient(req.ServiceID, req.PlanID),
 			ImplicitFlowEnabled: req.Parameters.ImplicitFlowEnabled,
+			ConsentRequired:     req.Parameters.ConsentRequired,
 		})
 	if err != nil {
 		logger.Error("failed to provision instance_id [%s]: %v", instanceId, err)

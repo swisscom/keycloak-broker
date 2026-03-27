@@ -24,11 +24,10 @@ services:
     description: standard OIDC client
     free: false
     metadata:
-      flow: xyz
+      publicClient: false
   - id: ece8f4ad-1ba0-481b-94b0-8fb4f066aa38
     name: public-client
     description: public OIDC client
     free: false
     metadata:
-      flow: xyz
-      public: true
+      publicClient: true
