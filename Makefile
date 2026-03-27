@@ -91,6 +91,11 @@ docker-cleanup:
 	docker system prune --volumes -a
 
 #=======================================================================================================================
+.PHONY: metrics-check
+## metrics-check: check broker metrics endpoint
+metrics-check:
+	curl -v http://localhost:9999/metrics
+
 .PHONY: health-check
 ## health-check: check broker health endpoint
 health-check:
