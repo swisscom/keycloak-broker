@@ -63,8 +63,12 @@ func (c *Client) getToken(ctx context.Context) (string, error) {
 	return c.token, nil
 }
 
-// getEndpoints returns common endpoints by calling the discovery endpoint
+// getEndpoints returns common endpoints by calling the discovery endpoint, caching the result.
 func (c *Client) getEndpoints(ctx context.Context) (*OIDCDiscoveryResponse, error) {
+	if c.discovery != nil {
+		return c.discovery, nil
+	}
+
 	token, err := c.getToken(ctx)
 	if err != nil {
 		return nil, err
@@ -93,5 +97,6 @@ func (c *Client) getEndpoints(ctx context.Context) (*OIDCDiscoveryResponse, erro
 	if err := json.NewDecoder(resp.Body).Decode(&discovery); err != nil {
 		return nil, fmt.Errorf("decode discovery endpoint: %w", err)
 	}
-	return &discovery, nil
+	c.discovery = &discovery
+	return c.discovery, nil
 }

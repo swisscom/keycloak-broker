@@ -180,6 +180,6 @@ func (b *Broker) UnbindInstance(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "validation", "description": err.Error()})
 	}
 
-	logger.Info("processed unbind request for instance_id [%s] and binding_id", instanceId, bindingId)
+	logger.Info("processed unbind request for instance_id [%s] and binding_id [%s]", instanceId, bindingId)
 	return c.JSON(http.StatusOK, map[string]any{})
 }

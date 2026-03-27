@@ -27,6 +27,8 @@ type Client struct {
 	mu    sync.Mutex
 	token string
 	expAt time.Time
+
+	discovery *OIDCDiscoveryResponse
 }
 
 func NewClient() *Client {
