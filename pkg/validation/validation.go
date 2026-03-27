@@ -90,5 +90,5 @@ func ValidatePlanID(serviceId, planId string) error {
 			return &ValidationError{"plan_id", "not found for this service"}
 		}
 	}
-	return &ValidationError{"plan_id", "service not found"}
+	return &ValidationError{"plan_id", "service not found in catalog"}
 }

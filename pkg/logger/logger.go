@@ -1,78 +1,47 @@
 package logger
 
 import (
-	"log"
+	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
 	"github.com/keycloak-broker/pkg/config"
 )
 
-type Level int
-
-const (
-	DEBUG Level = iota
-	INFO
-	WARN
-	ERROR
-	FATAL
-)
-
-var (
-	logger       *log.Logger
-	currentLevel Level
-)
-
-func init() {
-	logger = log.New(os.Stdout, "", log.LstdFlags)
-}
+var level = new(slog.LevelVar)
 
 func Init() {
 	cfg := config.Get()
-	currentLevel = parseLevel(cfg.LogLevel)
+	level.Set(parseLevel(cfg.LogLevel))
+	replaceAttr := func(groups []string, a slog.Attr) slog.Attr {
+		if !cfg.LogTimestamp && a.Key == slog.TimeKey {
+			return slog.Attr{}
+		}
+		return a
+	}
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level, ReplaceAttr: replaceAttr})))
 }
 
-func parseLevel(level string) Level {
-	switch strings.ToLower(level) {
+func parseLevel(s string) slog.Level {
+	switch strings.ToLower(s) {
 	case "debug":
-		return DEBUG
-	case "info":
-		return INFO
+		return slog.LevelDebug
 	case "warn", "warning":
-		return WARN
-	case "error":
-		return ERROR
-	case "fatal":
-		return FATAL
+		return slog.LevelWarn
+	case "error", "fatal":
+		return slog.LevelError
 	default:
-		return INFO
+		return slog.LevelInfo
 	}
 }
 
-func Debug(format string, v ...interface{}) {
-	if currentLevel <= DEBUG {
-		logger.Printf("[DEBUG] "+format, v...)
-	}
-}
-
-func Info(format string, v ...interface{}) {
-	if currentLevel <= INFO {
-		logger.Printf("[INFO] "+format, v...)
-	}
-}
-
-func Warn(format string, v ...interface{}) {
-	if currentLevel <= WARN {
-		logger.Printf("[WARN] "+format, v...)
-	}
-}
-
-func Error(format string, v ...interface{}) {
-	if currentLevel <= ERROR {
-		logger.Printf("[ERROR] "+format, v...)
-	}
-}
+func Debug(format string, v ...interface{}) { slog.Debug(fmt.Sprintf(format, v...)) }
+func Info(format string, v ...interface{})  { slog.Info(fmt.Sprintf(format, v...)) }
+func Warn(format string, v ...interface{})  { slog.Warn(fmt.Sprintf(format, v...)) }
+func Error(format string, v ...interface{}) { slog.Error(fmt.Sprintf(format, v...)) }
 
 func Fatal(format string, v ...interface{}) {
-	logger.Fatalf("[FATAL] "+format, v...)
+	slog.Error(fmt.Sprintf(format, v...))
+	os.Exit(1)
 }
