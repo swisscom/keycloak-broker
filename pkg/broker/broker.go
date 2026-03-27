@@ -31,7 +31,7 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 	instanceId := c.Param("instance_id")
 	if err := validation.ValidateInstanceID(instanceId); err != nil {
 		logger.Warn("invalid instance_id: %v", err)
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "validation", "description": err.Error()})
 	}
 
 	// read in request parameters
@@ -66,10 +66,11 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 	if err != nil {
 		if !errors.Is(err, keycloak.ErrNotFound) {
 			logger.Error("failed to get instance_id [%s]: %v", instanceId, err)
-			return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "fetch", "description": err.Error()})
 		}
 	}
 	if client != nil && client.ClientId == instanceId {
+		// it already exists, return data with HTTP 200
 		logger.Info("instance_id [%s] already exists", instanceId)
 		return c.JSON(http.StatusOK, keycloakClientToOSB(client))
 	}
@@ -84,9 +85,10 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 		})
 	if err != nil {
 		logger.Error("failed to provision instance_id [%s]: %v", instanceId, err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "provision", "description": err.Error()})
 	}
 
+	// newly created, return with HTTP 201
 	logger.Info("instance_id [%s] provisioned", instanceId)
 	return c.JSON(http.StatusCreated, keycloakClientToOSB(client))
 }
@@ -95,7 +97,7 @@ func (b *Broker) GetInstance(c echo.Context) error {
 	instanceId := c.Param("instance_id")
 	if err := validation.ValidateInstanceID(instanceId); err != nil {
 		logger.Warn("invalid instance_id: %v", err)
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "validation", "description": err.Error()})
 	}
 
 	logger.Debug("checking if instance_id [%s] exists", instanceId)
@@ -106,7 +108,7 @@ func (b *Broker) GetInstance(c echo.Context) error {
 			return c.JSON(http.StatusNotFound, map[string]any{})
 		}
 		logger.Error("failed to get instance_id [%s]: %v", instanceId, err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "fetch", "description": err.Error()})
 	}
 	return c.JSON(http.StatusOK, client)
 }
@@ -115,7 +117,7 @@ func (b *Broker) DeprovisionInstance(c echo.Context) error {
 	instanceId := c.Param("instance_id")
 	if err := validation.ValidateInstanceID(instanceId); err != nil {
 		logger.Warn("invalid instance_id: %v", err)
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "validation", "description": err.Error()})
 	}
 
 	logger.Info("deprovision instance_id [%s]", instanceId)
@@ -126,7 +128,7 @@ func (b *Broker) DeprovisionInstance(c echo.Context) error {
 			return c.JSON(http.StatusGone, map[string]any{})
 		}
 		logger.Error("failed to deprovision instance_id [%s]: %v", instanceId, err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "deprovision", "description": err.Error()})
 	}
 
 	logger.Info("deprovisioned instance_id [%s]", instanceId)
