@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/keycloak-broker/pkg/config"
 )
@@ -17,6 +18,9 @@ func Init() {
 	replaceAttr := func(groups []string, a slog.Attr) slog.Attr {
 		if !cfg.LogTimestamp && a.Key == slog.TimeKey {
 			return slog.Attr{}
+		}
+		if cfg.LogTimestamp && a.Key == slog.TimeKey {
+			a.Value = slog.StringValue(a.Value.Time().Format(time.RFC3339Nano))
 		}
 		return a
 	}

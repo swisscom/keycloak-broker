@@ -26,7 +26,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	format := `remote_ip="${remote_ip}" host="${host}" method=${method} uri=${uri} user_agent="${user_agent}" ` +
 		`status=${status} error="${error}" latency_human="${latency_human}" bytes_out=${bytes_out}` + "\n"
 	if cfg.LogTimestamp {
-		format = `time=${time_rfc3339} ` + format
+		format = `time=${time_rfc3339_nano} ` + format
 	}
 	// add logger middleware
 	g.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
