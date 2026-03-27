@@ -130,8 +130,39 @@ func (c *Client) GetClient(ctx context.Context, instanceId string) (*OIDCClientR
 		return nil, fmt.Errorf("decode clients: %w", err)
 	}
 
+// find client
 	for _, cl := range clients {
 		if cl.ClientId == instanceId {
+			if len(cl.Issuer) == 0 {
+				cl.Issuer = fmt.Sprintf("%s/realms/%s", c.baseURL, c.realm)
+			}
+			if len(cl.DiscoveryEndpoint) == 0 {
+				cl.DiscoveryEndpoint = fmt.Sprintf("%s/realms/%s/.well-known/openid-configuration", c.baseURL, c.realm)
+			}
+
+			// get all other endpoints by calling Keycloaks .well-known discovery endpoint
+			endpoints, err := c.getEndpoints(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("discovery endpoint request: %w", err)
+			}
+			if len(cl.AuthorizationEndpoint) == 0 {
+				cl.AuthorizationEndpoint = endpoints.AuthorizationEndpoint
+			}
+			if len(cl.TokenEndpoint) == 0 {
+				cl.TokenEndpoint = endpoints.TokenEndpoint
+			}
+			if len(cl.IntrospectionEndpoint) == 0 {
+				cl.IntrospectionEndpoint = endpoints.IntrospectionEndpoint
+			}
+			if len(cl.UserInfoEndpoint) == 0 {
+				cl.UserInfoEndpoint = endpoints.UserInfoEndpoint
+			}
+			if len(cl.EndSessionEndpoint) == 0 {
+				cl.EndSessionEndpoint = endpoints.EndSessionEndpoint
+			}
+			if len(cl.JWKSURI) == 0 {
+				cl.JWKSURI = endpoints.JWKSURI
+			}
 			return &cl, nil
 		}
 	}

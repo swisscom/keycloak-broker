@@ -20,10 +20,36 @@ type OSBClientResponseParameters struct {
 	ImplicitFlowEnabled       bool              `json:"implicitFlowEnabled,omitempty"`
 	DirectAccessGrantsEnabled bool              `json:"directAccessGrantsEnabled,omitempty"`
 	ServiceAccountsEnabled    bool              `json:"serviceAccountsEnabled,omitempty"`
+	Issuer                    string            `json:"issuer"`
+	DiscoveryEndpoint         string            `json:"discoveryEndpoint"`
+	AuthorizationEndpoint     string            `json:"authorizationEndpoint"`
+	TokenEndpoint             string            `json:"tokenEndpoint"`
+	IntrospectionEndpoint     string            `json:"introspectionEndpoint"`
+	UserInfoEndpoint          string            `json:"userInfoEndpoint"`
+	EndSessionEndpoint        string            `json:"endSessionEndpoint"`
+	JWKSURI                   string            `json:"jwksURI"`
 	Attributes                map[string]string `json:"attributes,omitempty"`
 }
 
 // OSBBindingResponse represents an OSB API response of a service instance binding.
 type OSBBindingResponse struct {
-	// TODO: ...
+	Metadata    OSBBindingResponseMetadata    `json:"metadata"`
+	Credentials OSBBindingResponseCredentials `json:"credentials"`
+}
+type OSBBindingResponseMetadata struct {
+	ServiceId string `json:"serviceId"`
+	PlanId    string `json:"planId"`
+}
+type OSBBindingResponseCredentials struct {
+	ClientId              string   `json:"clientId"`
+	ClientSecret          string   `json:"clientSecret"`
+	RedirectURIs          []string `json:"redirectURIs"`
+	Issuer                string   `json:"issuer"`
+	DiscoveryEndpoint     string   `json:"discoveryEndpoint"`
+	AuthorizationEndpoint string   `json:"authorizationEndpoint"`
+	TokenEndpoint         string   `json:"tokenEndpoint"`
+	IntrospectionEndpoint string   `json:"introspectionEndpoint"`
+	UserInfoEndpoint      string   `json:"userInfoEndpoint"`
+	EndSessionEndpoint    string   `json:"endSessionEndpoint"`
+	JWKSURI               string   `json:"jwksURI"`
 }

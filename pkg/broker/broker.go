@@ -135,14 +135,51 @@ func (b *Broker) DeprovisionInstance(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{})
 }
 
+// this method does not do anything meaningful, this broker intentionally does NOT cycle client credentials, but still responds to binding/unbinding requests due to Cloud Foundry compatibility
 func (b *Broker) BindInstance(c echo.Context) error {
-	return nil
+	instanceId := c.Param("instance_id")
+	if err := validation.ValidateInstanceID(instanceId); err != nil {
+		logger.Warn("invalid instance_id: %v", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "validation", "description": err.Error()})
+	}
+	bindingId := c.Param("binding_id")
+	if err := validation.ValidateBindingID(bindingId); err != nil {
+		logger.Warn("invalid binding_id: %v", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "validation", "description": err.Error()})
+	}
+
+	logger.Debug("checking if instance_id [%s] exists", instanceId)
+	client, err := b.client.GetClient(context.Background(), instanceId)
+	if err != nil {
+		if errors.Is(err, keycloak.ErrNotFound) {
+			logger.Debug("instance_id [%s] not found", instanceId)
+			return c.JSON(http.StatusNotFound, map[string]any{})
+		}
+		logger.Error("failed to get instance_id [%s]: %v", instanceId, err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "fetch", "description": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, keycloakClientToOSBBinding(client))
 }
 
+// this method does not do anything meaningful, this broker intentionally does NOT cycle client credentials, but still responds to binding/unbinding requests due to Cloud Foundry compatibility
 func (b *Broker) GetBinding(c echo.Context) error {
-	return nil
+	return b.BindInstance(c)
 }
 
+// this method does not do anything meaningful, this broker intentionally does NOT cycle client credentials, but still responds to binding/unbinding requests due to Cloud Foundry compatibility
 func (b *Broker) UnbindInstance(c echo.Context) error {
-	return nil
+	instanceId := c.Param("instance_id")
+	if err := validation.ValidateInstanceID(instanceId); err != nil {
+		logger.Warn("invalid instance_id: %v", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "validation", "description": err.Error()})
+	}
+	bindingId := c.Param("binding_id")
+	if err := validation.ValidateBindingID(bindingId); err != nil {
+		logger.Warn("invalid binding_id: %v", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "validation", "description": err.Error()})
+	}
+
+	logger.Info("processed unbind request for instance_id [%s] and binding_id", instanceId, bindingId)
+	return c.JSON(http.StatusOK, map[string]any{})
 }

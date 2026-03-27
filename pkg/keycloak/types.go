@@ -46,9 +46,24 @@ type OIDCClientResponse struct {
 	ImplicitFlowEnabled       bool              `json:"implicitFlowEnabled"`
 	DirectAccessGrantsEnabled bool              `json:"directAccessGrantsEnabled"`
 	ServiceAccountsEnabled    bool              `json:"serviceAccountsEnabled"`
+	Issuer                    string            `json:"issuer"`
+	DiscoveryEndpoint         string            `json:"discoveryEndpoint"`
+	AuthorizationEndpoint     string            `json:"authorizationEndpoint"`
+	TokenEndpoint             string            `json:"tokenEndpoint"`
+	IntrospectionEndpoint     string            `json:"introspectionEndpoint"`
+	UserInfoEndpoint          string            `json:"userInfoEndpoint"`
+	EndSessionEndpoint        string            `json:"endSessionEndpoint"`
+	JWKSURI                   string            `json:"jwksURI"`
 	Attributes                map[string]string `json:"attributes"`
 }
 
-/*
-[{"id":"a3f297ce-c7f5-4ed9-8e79-165d5d359d6d","clientId":"fe5556b9-8478-409b-ab2b-3c95ba06c5fc","name":"fe5556b9-8478-409b-ab2b-3c95ba06c5fc","description":"managed OIDC client","surrogateAuthRequired":false,"enabled":true,"alwaysDisplayInConsole":false,"clientAuthenticatorType":"client-secret","secret":"YNqtYBjOoGi2MTg5JlbJBPLENLWd12KB","redirectUris":[],"webOrigins":[],"notBefore":0,"bearerOnly":false,"consentRequired":false,"standardFlowEnabled":true,"implicitFlowEnabled":false,"directAccessGrantsEnabled":false,"serviceAccountsEnabled":false,"publicClient":false,"frontchannelLogout":false,"protocol":"openid-connect","attributes":{"realm_client":"false","client.secret.creation.time":"1774463924","backchannel.logout.session.required":"true","backchannel.logout.revoke.offline.tokens":"false"},"authenticationFlowBindingOverrides":{},"fullScopeAllowed":true,"nodeReRegistrationTimeout":-1,"defaultClientScopes":["web-origins","acr","roles","profile","basic","email"],"optionalClientScopes":["address","phone","organization","offline_access","microprofile-jwt"],"access":{"view":true,"configure":true,"manage":true}}]
-*/
+// OIDCDiscoveryResponse represents a Keycloak OIDC discovery endpoint response.
+type OIDCDiscoveryResponse struct {
+	Issuer                    string            `json:"issuer"`
+	AuthorizationEndpoint     string            `json:"authorization_endpoint"`
+	TokenEndpoint             string            `json:"token_endpoint"`
+	IntrospectionEndpoint     string            `json:"introspection_endpoint"`
+	UserInfoEndpoint          string            `json:"userinfo_endpoint"`
+	EndSessionEndpoint        string            `json:"end_session_endpoint"`
+	JWKSURI                   string            `json:"jwks_uri"`
+}

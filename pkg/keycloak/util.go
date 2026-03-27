@@ -62,3 +62,36 @@ func (c *Client) getToken(ctx context.Context) (string, error) {
 	c.expAt = time.Now().Add(time.Duration(tok.ExpiresIn-15) * time.Second) // 15s buffer
 	return c.token, nil
 }
+
+// getEndpoints returns common endpoints by calling the discovery endpoint
+func (c *Client) getEndpoints(ctx context.Context) (*OIDCDiscoveryResponse, error) {
+	token, err := c.getToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet,
+		fmt.Sprintf("%s/realms/%s/.well-known/openid-configuration", c.baseURL, c.realm),
+		nil)
+	if err != nil {
+		return nil, fmt.Errorf("build get request: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("get discovery endpoint: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		respBody, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("get discovery endpoint failed (%d): %s", resp.StatusCode, respBody)
+	}
+
+	var discovery OIDCDiscoveryResponse
+	if err := json.NewDecoder(resp.Body).Decode(&discovery); err != nil {
+		return nil, fmt.Errorf("decode discovery endpoint: %w", err)
+	}
+	return &discovery, nil
+}
