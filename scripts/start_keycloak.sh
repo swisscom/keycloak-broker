@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 KEYCLOAK_URL="http://localhost:8080"
 REALM="dev-realm"

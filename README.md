@@ -78,7 +78,7 @@ All configuration is via environment variables:
 
 ```bash
 # start a local Keycloak dev server with a pre-configured realm
-make setup
+make start-keycloak
 
 # run the broker with hot-reload
 make run
@@ -91,7 +91,7 @@ make dev
 
 ```bash
 # provision an OIDC client
-make provision
+make provision-instance
 
 # fetch the instance
 make fetch-instance
@@ -106,7 +106,7 @@ make fetch-binding
 make delete-binding
 
 # deprovision (deletes the OIDC client)
-make deprovision
+make deprovision-instance
 ```
 
 ### Other Targets
@@ -118,4 +118,14 @@ make build           # build binary
 make test            # run tests with race detector
 make init            # initializes and updates all golang module vendoring
 make install-air     # installs "air" hot-reloader
+```
+
+## Complete test flow with an OIDC client
+
+```bash
+make start-keycloak
+make run
+make provision-instance
+make bind-instance
+make test-oidc-login
 ```
