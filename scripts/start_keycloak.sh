@@ -33,6 +33,29 @@ curl -s -X POST "$KEYCLOAK_URL/admin/realms" \
   -H "Content-Type: application/json" \
   -d '{"realm": "'"$REALM"'", "enabled": true}'
 
+echo ""
 echo "Keycloak dev server started at $KEYCLOAK_URL"
 echo "Admin console: $KEYCLOAK_URL/admin (admin/super-secret-admin-password)"
-echo "with realm [$REALM] already created ..."
+echo "Realm: $REALM"
+echo ""
+
+# Create test users in the realm
+create_user() {
+  local username=$1 email=$2 first=$3 last=$4 password=$5
+  curl -s -X POST "$KEYCLOAK_URL/admin/realms/$REALM/users" \
+    -H "Authorization: Bearer $ADMIN_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "username": "'"$username"'",
+      "email": "'"$email"'",
+      "firstName": "'"$first"'",
+      "lastName": "'"$last"'",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{"type": "password", "value": "'"$password"'", "temporary": false}]
+    }'
+  echo "Created user: $email / $password"
+}
+create_user "john.doe" "john.doe@example.com" "John"    "Doe"      "password123"
+create_user "albert"   "einstein@example.com" "Albert"  "Einstein" "relative"
+create_user "känguru"  "känguru@example.com"  "Känguru" "none"     "halt-mal-kurz"

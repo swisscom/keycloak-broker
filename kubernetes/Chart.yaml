@@ -1,0 +1,8 @@
+apiVersion: v2
+name: keycloak-broker
+description: A Helm chart for deploying keycloak-broker in Kubernetes
+version: 1.0.0
+appVersion: 1.0.0
+maintainers:
+- name: Fabio Berchtold
+  email: fabio.berchtold@swisscom.com

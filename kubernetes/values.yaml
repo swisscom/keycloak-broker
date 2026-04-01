@@ -1,0 +1,32 @@
+---
+broker:
+  image:
+    repository: corpid-docker-local.artifactory.swisscom.com/swisscom/keycloak-broker
+    tag: 0.0.1
+    pullPolicy: Always
+    pullSecret:
+      registry: corpid-docker-local.artifactory.swisscom.com
+      username: ""
+      password: ""
+
+  replicas: 2
+
+  gateway:
+    name: keycloak
+    namespace: envoy-gateway-system
+    section: keycloak
+    fqdn: corpid.iam.swisscom.com
+
+  configuration:
+    port: 9999
+    log_level: debug
+    log_timestamp: false
+    username: disco
+    password: dingo
+
+keycloak:
+  configuration:
+    url: http://localhost:8080
+    realm: dev-realm
+    admin: admin
+    password: super-secret-admin-password

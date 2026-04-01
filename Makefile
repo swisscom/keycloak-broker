@@ -51,6 +51,13 @@ install-air:
 	go install github.com/air-verse/air@v1.64.5
 	#go install github.com/air-verse/air@latest
 
+.PHONY: cleanup
+cleanup: docker-cleanup
+.PHONY: docker-cleanup
+## docker-cleanup: cleans up local docker images and volumes
+docker-cleanup:
+	docker system prune --volumes -a
+
 #=======================================================================================================================
 .PHONY: setup
 ## setup: setup keycloak for development
@@ -138,3 +145,83 @@ fetch-binding:
 delete-binding:
 	curl -v http://disco:dingo@localhost:9999/v2/service_instances/fe5556b9-8478-409b-ab2b-3c95ba06c5fc/service_bindings/db59931a-70a6-43c1-8885-b0c6b1c194d4  \
 		-X DELETE
+
+#=======================================================================================================================
+#================== registry related stuff
+.PHONY: image-login
+## image-login: login to registry
+image-login:
+	@export PATH="$$HOME/bin:$$PATH"
+	@echo $$CONTAINER_REGISTRY_PASSWORD | docker login -u $$CONTAINER_REGISTRY_USERNAME --password-stdin $$CONTAINER_REGISTRY_HOSTNAME
+
+.PHONY: image-build
+## image-build: build registry image
+image-build: build
+	@export PATH="$$HOME/bin:$$PATH"
+	docker build -t $$CONTAINER_REGISTRY_HOSTNAME/swisscom/${APP}:${COMMIT_SHA} .
+
+.PHONY: image-publish
+## image-publish: build and publish registry image
+image-publish:
+	@export PATH="$$HOME/bin:$$PATH"
+	docker push $$CONTAINER_REGISTRY_HOSTNAME/swisscom/${APP}:${COMMIT_SHA}
+	docker tag $$CONTAINER_REGISTRY_HOSTNAME/swisscom/${APP}:${COMMIT_SHA} $$CONTAINER_REGISTRY_HOSTNAME/swisscom/${APP}:$$HELM_CHART_VERSION
+	docker tag $$CONTAINER_REGISTRY_HOSTNAME/swisscom/${APP}:${COMMIT_SHA} $$CONTAINER_REGISTRY_HOSTNAME/swisscom/${APP}:latest
+	docker push $$CONTAINER_REGISTRY_HOSTNAME/swisscom/${APP}:$$HELM_CHART_VERSION
+	docker push $$CONTAINER_REGISTRY_HOSTNAME/swisscom/${APP}:latest
+
+.PHONY: image-run
+## image-run: run registry image
+image-run:
+	@export PATH="$$HOME/bin:$$PATH"
+	docker run --rm -p 8080:8080 $$CONTAINER_REGISTRY_HOSTNAME/swisscom/${APP}:${COMMIT_SHA}
+
+.PHONY: image-clean
+## image-clean: cleans up local registry image
+image-clean:
+	docker rm -f ${APP} || true
+	docker rm -f $$CONTAINER_REGISTRY_HOSTNAME/swisscom/${APP} || true
+
+.PHONY: image-test
+## image-test: runs tests for image
+image-test: test image-build
+	docker images | grep swisscom/${APP}
+
+########################################################################################################################
+####### helm related stuff, needed for concourse #######################################################################
+########################################################################################################################
+.PHONY: helm-test
+## helm-test: runs testing
+helm-test: test image-test helm-render
+	# TODO: implement helm chart testsuite, see https://helm.sh/docs/topics/chart_tests/
+	# helm test keycloak-broker
+
+.PHONY: helm-update-chart
+## helm-update-chart: update image(s) and versions in helm chart
+helm-update-chart:
+	sed -i "s|repository:.*|repository: $$CONTAINER_REGISTRY_HOSTNAME/swisscom/keycloak-broker|g" kubernetes/values.yaml
+	sed -i "s|registry:.*|registry: $$CONTAINER_REGISTRY_HOSTNAME|g" kubernetes/values.yaml
+	sed -i "s|tag:.*|tag: $$HELM_CHART_VERSION|g" kubernetes/values.yaml
+	sed -i "s|version:.*|version: $$HELM_CHART_VERSION|g" kubernetes/Chart.yaml
+	sed -i "s|appVersion:.*|appVersion: $$HELM_CHART_VERSION|g" kubernetes/Chart.yaml
+
+.PHONY: helm-render
+## helm-render: renders the helm chart templates
+helm-render:
+	helm template keycloak-broker "./kubernetes" -n kube-system --atomic --timeout 10m -f "kubernetes/values.yaml"
+
+.PHONY: helm-deploy
+## helm-deploy: deploys the helm chart
+helm-deploy:
+	helm upgrade --install --cleanup-on-fail --atomic --wait --timeout "10m" \
+		-f "values.yaml" -n kube-system keycloak-broker "./kubernetes"
+
+.PHONY: helm-package
+## helm-package: packages the helm chart
+helm-package: helm-update-chart
+	helm package "./kubernetes" --version $$HELM_CHART_VERSION
+
+.PHONY: helm-images
+## helm-images: list images used by helm chart
+helm-images:
+	@helm template "./kubernetes" | yq '..|.image? | select(.)' | sort -u | grep -v '\---'

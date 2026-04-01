@@ -1,0 +1,63 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Release.Name }}
+    app.kubernetes.io/component: app
+    app.kubernetes.io/name: keycloak-broker
+  name: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.broker.replicas }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      app.kubernetes.io/component: app
+      app.kubernetes.io/name: keycloak-broker
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        app.kubernetes.io/component: app
+        app.kubernetes.io/name: keycloak-broker
+      annotations:
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+        reloader.stakater.com/auto: "true"
+    spec:
+      {{- if and .Values.broker.image.pullSecret.username .Values.broker.image.pullSecret.password }}
+      imagePullSecrets:
+      - name: {{ .Release.Name }}-registry
+      {{- end }}
+      containers:
+      - name: keycloak-broker
+        image: {{ .Values.broker.image.repository }}:{{ .Values.broker.image.tag }}
+        imagePullPolicy: {{ .Values.broker.image.pullPolicy }}
+        ports:
+        - containerPort: 8080
+          name: web
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        env:
+        - name: "TZ"
+          value: "Europe/Zurich"
+        envFrom:
+        - secretRef:
+            name: {{ .Release.Name }}
+        securityContext:
+          privileged: false
+      restartPolicy: Always

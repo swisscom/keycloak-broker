@@ -1,0 +1,21 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  labels:
+    app: {{ .Release.Name }}
+    app.kubernetes.io/component: httproute
+    app.kubernetes.io/name: keycloak-broker
+  name: {{ .Release.Name }}
+spec:
+  parentRefs:
+  - name: {{ .Values.broker.gateway.name }}
+    namespace: {{ .Values.broker.gateway.namespace }}
+    sectionName: {{ .Values.broker.gateway.section }}
+  hostnames:
+  - {{ .Values.broker.gateway.fqdn }}
+  rules:
+  - backendRefs:
+    - name: {{ .Release.Name }}
+      kind: Service
+      port: 8080
