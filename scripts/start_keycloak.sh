@@ -42,7 +42,7 @@ echo ""
 
 # Create test users in the realm
 create_user() {
-  local username=$1 email=$2 first=$3 last=$4 password=$5
+  local username=$1 email=$2 first=$3 last=$4 password=$5 phone=$6
   curl -s -X POST "$KEYCLOAK_URL/admin/realms/$REALM/users" \
     -H "Authorization: Bearer $ADMIN_TOKEN" \
     -H "Content-Type: application/json" \
@@ -53,10 +53,11 @@ create_user() {
       "lastName": "'"$last"'",
       "enabled": true,
       "emailVerified": true,
+      "attributes": {"phoneNumber": ["'"$phone"'"], "phoneNumberVerified": ["true"]},
       "credentials": [{"type": "password", "value": "'"$password"'", "temporary": false}]
     }'
-  echo "Created user: $email / $password"
+  echo "Created user: $email / $password ($phone)"
 }
-create_user "john.doe" "john.doe@example.com" "John"    "Doe"      "password123"
-create_user "albert"   "einstein@example.com" "Albert"  "Einstein" "relative"
-create_user "känguru"  "känguru@example.com"  "Känguru" "none"     "halt-mal-kurz"
+create_user "john.doe" "john.doe@example.com" "John"    "Doe"      "password123"   "+41791234567"
+create_user "albert"   "einstein@example.com" "Albert"  "Einstein" "relative"      "+41791234568"
+create_user "känguru"  "känguru@example.com"  "Känguru" "none"     "halt-mal-kurz" "+41791234569"

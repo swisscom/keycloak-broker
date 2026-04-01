@@ -25,7 +25,7 @@ TOKEN_RESPONSE=$(curl -sf -X POST "$KEYCLOAK_URL/realms/$REALM/protocol/openid-c
   -d "client_secret=$CLIENT_SECRET" \
   -d "username=$USERNAME" \
   -d "password=$PASSWORD" \
-  -d "scope=openid")
+  -d "scope=openid email phone")
 ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.access_token')
 echo "Access token obtained: [$ACCESS_TOKEN]"
 echo ""
