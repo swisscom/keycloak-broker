@@ -2,11 +2,12 @@ package keycloak
 
 // OIDCClientParameters represents Keycloak OIDC client parameters
 type OIDCClientParameters struct {
-	RedirectURIs        []string          `json:"redirectUris"`
-	PublicClient        bool              `json:"publicClient"`
-	ConsentRequired     bool              `json:"consentRequired"`
-	ImplicitFlowEnabled bool              `json:"implicitFlowEnabled"`
-	Attributes          map[string]string `json:"attributes,omitempty"`
+	RedirectURIs              []string          `json:"redirectUris"`
+	PublicClient              bool              `json:"publicClient"`
+	ConsentRequired           bool              `json:"consentRequired"`
+	ImplicitFlowEnabled       bool              `json:"implicitFlowEnabled"`
+	DirectAccessGrantsEnabled bool              `json:"directAccessGrantsEnabled"`
+	Attributes                map[string]string `json:"attributes,omitempty"`
 }
 
 // OIDCClientPayload represents a Keycloak OIDC client payload for the admin API.

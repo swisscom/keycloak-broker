@@ -40,9 +40,10 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 		PlanID     string         `json:"plan_id"`
 		Context    map[string]any `json:"context"`
 		Parameters struct {
-			RedirectURIs        []string `json:"redirect_uris"`
-			ImplicitFlowEnabled bool     `json:"implicit_flow_enabled"`
-			ConsentRequired     bool     `json:"consent_required"`
+			RedirectURIs              []string `json:"redirectURIs"`
+			ImplicitFlowEnabled       bool     `json:"implicitFlowEnabled"`
+			DirectAccessGrantsEnabled bool     `json:"directAccessGrantsEnabled"`
+			ConsentRequired           bool     `json:"consentRequired"`
 		} `json:"parameters"`
 	}
 	if err := c.Bind(&req); err != nil {
@@ -78,10 +79,11 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 	client, err = b.client.CreateClient(context.Background(),
 		instanceId, req.ServiceID, req.PlanID,
 		&keycloak.OIDCClientParameters{
-			RedirectURIs:        req.Parameters.RedirectURIs,
-			PublicClient:        catalog.IsPublicClient(req.ServiceID, req.PlanID),
-			ImplicitFlowEnabled: req.Parameters.ImplicitFlowEnabled,
-			ConsentRequired:     req.Parameters.ConsentRequired,
+			RedirectURIs:              req.Parameters.RedirectURIs,
+			PublicClient:              catalog.IsPublicClient(req.ServiceID, req.PlanID),
+			ImplicitFlowEnabled:       req.Parameters.ImplicitFlowEnabled,
+			DirectAccessGrantsEnabled: req.Parameters.DirectAccessGrantsEnabled,
+			ConsentRequired:           req.Parameters.ConsentRequired,
 		})
 	if err != nil {
 		logger.Error("failed to provision instance_id [%s]: %v", instanceId, err)

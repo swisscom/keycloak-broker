@@ -65,7 +65,7 @@ func (c *Client) CreateClient(ctx context.Context, instanceId, serviceId, planId
 		ConsentRequired:           paramaters.ConsentRequired,
 		StandardFlowEnabled:       true,
 		ImplicitFlowEnabled:       paramaters.ImplicitFlowEnabled,
-		DirectAccessGrantsEnabled: false,
+		DirectAccessGrantsEnabled: paramaters.DirectAccessGrantsEnabled,
 		ServiceAccountsEnabled:    false,
 		Attributes:                attributes,
 	}

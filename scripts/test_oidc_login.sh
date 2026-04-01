@@ -19,7 +19,7 @@ echo ""
 
 # Login with test user via "password" grant
 echo "Logging in as $USERNAME ..."
-TOKEN_RESPONSE=$(curl -sf -X POST "$KEYCLOAK_URL/realms/$REALM/protocol/openid-connect/token" \
+TOKEN_RESPONSE=$(curl -sfv -X POST "$KEYCLOAK_URL/realms/$REALM/protocol/openid-connect/token" \
   -d "grant_type='password'" \
   -d "client_id='$CLIENT_ID'" \
   -d "client_secret='$CLIENT_SECRET'" \
