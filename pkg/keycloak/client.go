@@ -182,7 +182,31 @@ func (c *Client) UpdateClient(ctx context.Context, instanceId string, update *OI
 	if err != nil {
 		return nil, err
 	}
-	body, err := json.Marshal(update)
+
+	// merge update into existing client to avoid wiping fields on PUT
+	merged := OIDCClientPayload{
+		ClientId:                  existing.ClientId,
+		Name:                      existing.Name,
+		Description:               existing.Description,
+		Enabled:                   existing.Enabled,
+		Protocol:                  existing.Protocol,
+		PublicClient:              existing.PublicClient,
+		RedirectURIs:              existing.RedirectURIs,
+		ConsentRequired:           existing.ConsentRequired,
+		StandardFlowEnabled:       existing.StandardFlowEnabled,
+		ImplicitFlowEnabled:       existing.ImplicitFlowEnabled,
+		DirectAccessGrantsEnabled: existing.DirectAccessGrantsEnabled,
+		ServiceAccountsEnabled:    existing.ServiceAccountsEnabled,
+		Attributes:                existing.Attributes,
+	}
+	if update.RedirectURIs != nil {
+		merged.RedirectURIs = update.RedirectURIs
+	}
+	merged.ConsentRequired = update.ConsentRequired
+	merged.ImplicitFlowEnabled = update.ImplicitFlowEnabled
+	merged.DirectAccessGrantsEnabled = update.DirectAccessGrantsEnabled
+
+	body, err := json.Marshal(merged)
 	if err != nil {
 		return nil, fmt.Errorf("marshal update payload failure: %w", err)
 	}

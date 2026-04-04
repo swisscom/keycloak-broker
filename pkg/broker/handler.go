@@ -4,6 +4,7 @@ import (
 	"crypto/subtle"
 
 	"github.com/keycloak-broker/pkg/config"
+	"github.com/keycloak-broker/pkg/keycloak"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -12,9 +13,9 @@ type Handler struct {
 	broker *Broker
 }
 
-func New() *Handler {
+func New(client *keycloak.Client) *Handler {
 	return &Handler{
-		broker: NewBroker(),
+		broker: NewBroker(client),
 	}
 }
 

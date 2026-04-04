@@ -16,9 +16,9 @@ type Broker struct {
 	client *keycloak.Client
 }
 
-func NewBroker() *Broker {
+func NewBroker(client *keycloak.Client) *Broker {
 	return &Broker{
-		client: keycloak.NewClient(),
+		client: client,
 	}
 }
 
@@ -112,7 +112,7 @@ func (b *Broker) GetInstance(c echo.Context) error {
 		logger.Error("failed to get instance_id [%s]: %v", instanceId, err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "fetch", "description": err.Error()})
 	}
-	return c.JSON(http.StatusOK, client)
+	return c.JSON(http.StatusOK, keycloakClientToOSB(client))
 }
 
 func (b *Broker) DeprovisionInstance(c echo.Context) error {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/keycloak-broker/pkg/broker"
 	"github.com/keycloak-broker/pkg/health"
+	"github.com/keycloak-broker/pkg/keycloak"
 	"github.com/keycloak-broker/pkg/metrics"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -30,12 +31,15 @@ func New() *Router {
 	// e.Use(middleware.Recover()) // don't recover, let platform deal with panics
 	// e.Use(middleware.Static("static"))
 
+	// initialize the keycloak client
+	kc := keycloak.NewClient()
+
 	// setup router
 	r := &Router{
 		echo:    e,
-		health:  health.New(),
 		metrics: metrics.New(),
-		broker:  broker.New(),
+		health:  health.New(kc),
+		broker:  broker.New(kc),
 	}
 
 	// setup health route

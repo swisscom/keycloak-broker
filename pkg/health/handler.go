@@ -12,9 +12,9 @@ type Handler struct {
 	client *keycloak.Client
 }
 
-func New() *Handler {
+func New(client *keycloak.Client) *Handler {
 	return &Handler{
-		client: keycloak.NewClient(),
+		client: client,
 	}
 }
 
