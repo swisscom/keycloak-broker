@@ -137,6 +137,59 @@ func (b *Broker) DeprovisionInstance(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{})
 }
 
+func (b *Broker) UpdateInstance(c echo.Context) error {
+	instanceId := c.Param("instance_id")
+	if err := validation.ValidateInstanceID(instanceId); err != nil {
+		logger.Warn("invalid instance_id: %v", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "validation", "description": err.Error()})
+	}
+
+	// read in request parameters
+	var req struct {
+		ServiceID  string         `json:"service_id"`
+		PlanID     string         `json:"plan_id"`
+		Context    map[string]any `json:"context"`
+		Parameters struct {
+			RedirectURIs              []string `json:"redirectURIs"`
+			ImplicitFlowEnabled       bool     `json:"implicitFlowEnabled"`
+			DirectAccessGrantsEnabled bool     `json:"directAccessGrantsEnabled"`
+			ConsentRequired           bool     `json:"consentRequired"`
+		} `json:"parameters"`
+	}
+	if err := c.Bind(&req); err != nil {
+		logger.Error("failed to parse update request for instance_id [%s]: %v", instanceId, err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "payload", "description": err.Error()})
+	}
+
+	// validate service and plan IDs
+	if err := validation.ValidateServiceID(req.ServiceID); err != nil {
+		logger.Warn("invalid service_id [%s] for %s: %v", req.ServiceID, instanceId, err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "validation", "description": err.Error()})
+	}
+	if err := validation.ValidatePlanID(req.ServiceID, req.PlanID); err != nil {
+		logger.Warn("invalid plan_id [%s] for %s: %v", req.PlanID, instanceId, err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "validation", "description": err.Error()})
+	}
+
+	client, err := b.client.UpdateClient(context.Background(), instanceId, &keycloak.OIDCClientUpdatePayload{
+		RedirectURIs:              req.Parameters.RedirectURIs,
+		ConsentRequired:           req.Parameters.ConsentRequired,
+		ImplicitFlowEnabled:       req.Parameters.ImplicitFlowEnabled,
+		DirectAccessGrantsEnabled: req.Parameters.DirectAccessGrantsEnabled,
+	})
+	if err != nil {
+		if errors.Is(err, keycloak.ErrNotFound) {
+			logger.Debug("instance_id [%s] not found", instanceId)
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "update", "description": err.Error()})
+		}
+		logger.Error("failed to update instance_id [%s]: %v", instanceId, err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "update", "description": err.Error()})
+	}
+
+	logger.Info("instance_id [%s] updated", instanceId)
+	return c.JSON(http.StatusOK, keycloakClientToOSB(client))
+}
+
 // this method does not do anything meaningful, this broker intentionally does NOT cycle client credentials, but still responds to binding/unbinding requests due to Cloud Foundry compatibility
 func (b *Broker) BindInstance(c echo.Context) error {
 	instanceId := c.Param("instance_id")

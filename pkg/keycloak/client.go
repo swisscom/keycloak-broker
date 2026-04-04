@@ -171,6 +171,46 @@ func (c *Client) GetClient(ctx context.Context, instanceId string) (*OIDCClientR
 	return nil, fmt.Errorf("get client instance_id [%s]: %w", instanceId, ErrNotFound)
 }
 
+// UpdateClient updates an existing OIDC client's parameters in Keycloak.
+func (c *Client) UpdateClient(ctx context.Context, instanceId string, update *OIDCClientUpdatePayload) (*OIDCClientResponse, error) {
+	token, err := c.getToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	existing, err := c.GetClient(ctx, instanceId)
+	if err != nil {
+		return nil, err
+	}
+	body, err := json.Marshal(update)
+	if err != nil {
+		return nil, fmt.Errorf("marshal update payload failure: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut,
+		fmt.Sprintf("%s/admin/realms/%s/clients/%s", c.baseURL, c.realm, existing.Id),
+		bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("build update request for client instance_id [%s]: %w", instanceId, err)
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("update client instance_id [%s]: %w", instanceId, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		respBody, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("update client instance_id [%s] failed (%d): %s", instanceId, resp.StatusCode, respBody)
+	}
+
+	logger.Info("updated keycloak client with instance_id [%s]", instanceId)
+	return c.GetClient(ctx, instanceId)
+}
+
 // DeleteClient removes an OIDC client by clientId.
 func (c *Client) DeleteClient(ctx context.Context, instanceId string) error {
 	token, err := c.getToken(ctx)

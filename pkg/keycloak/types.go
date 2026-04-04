@@ -58,6 +58,14 @@ type OIDCClientResponse struct {
 	Attributes                map[string]string `json:"attributes"`
 }
 
+// OIDCClientUpdatePayload represents a Keycloak OIDC client update payload for the admin API.
+type OIDCClientUpdatePayload struct {
+	RedirectURIs              []string `json:"redirectUris,omitempty"`
+	ConsentRequired           bool     `json:"consentRequired"`
+	ImplicitFlowEnabled       bool     `json:"implicitFlowEnabled"`
+	DirectAccessGrantsEnabled bool     `json:"directAccessGrantsEnabled"`
+}
+
 // OIDCDiscoveryResponse represents a Keycloak OIDC discovery endpoint response.
 type OIDCDiscoveryResponse struct {
 	Issuer                    string            `json:"issuer"`
