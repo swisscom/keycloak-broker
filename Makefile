@@ -51,13 +51,6 @@ install-air:
 	go install github.com/air-verse/air@v1.64.5
 	#go install github.com/air-verse/air@latest
 
-.PHONY: cleanup
-cleanup: docker-cleanup
-.PHONY: docker-cleanup
-## docker-cleanup: cleans up local docker images and volumes
-docker-cleanup:
-	docker system prune --volumes -a
-
 #=======================================================================================================================
 .PHONY: setup
 ## setup: setup keycloak for development
