@@ -41,6 +41,7 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 		Context    map[string]any `json:"context"`
 		Parameters struct {
 			RedirectURIs              []string `json:"redirectURIs"`
+			StandardFlowEnabled       *bool    `json:"standardFlowEnabled,omitempty"`
 			ImplicitFlowEnabled       bool     `json:"implicitFlowEnabled"`
 			DirectAccessGrantsEnabled bool     `json:"directAccessGrantsEnabled"`
 			ConsentRequired           bool     `json:"consentRequired"`
@@ -85,6 +86,7 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 		&keycloak.OIDCClientParameters{
 			RedirectURIs:              req.Parameters.RedirectURIs,
 			PublicClient:              catalog.IsPublicClient(req.ServiceID, req.PlanID),
+			StandardFlowEnabled:       req.Parameters.StandardFlowEnabled,
 			ImplicitFlowEnabled:       req.Parameters.ImplicitFlowEnabled,
 			DirectAccessGrantsEnabled: req.Parameters.DirectAccessGrantsEnabled,
 			ConsentRequired:           req.Parameters.ConsentRequired,
@@ -159,6 +161,7 @@ func (b *Broker) UpdateInstance(c echo.Context) error {
 		Context    map[string]any `json:"context"`
 		Parameters struct {
 			RedirectURIs              []string `json:"redirectURIs"`
+			StandardFlowEnabled       *bool    `json:"standardFlowEnabled,omitempty"`
 			ImplicitFlowEnabled       *bool    `json:"implicitFlowEnabled,omitempty"`
 			DirectAccessGrantsEnabled *bool    `json:"directAccessGrantsEnabled,omitempty"`
 			ConsentRequired           *bool    `json:"consentRequired,omitempty"`
@@ -186,6 +189,7 @@ func (b *Broker) UpdateInstance(c echo.Context) error {
 	client, err := b.client.UpdateClient(context.Background(), instanceId, &keycloak.OIDCClientUpdatePayload{
 		RedirectURIs:              req.Parameters.RedirectURIs,
 		ConsentRequired:           req.Parameters.ConsentRequired,
+		StandardFlowEnabled:       req.Parameters.StandardFlowEnabled,
 		ImplicitFlowEnabled:       req.Parameters.ImplicitFlowEnabled,
 		DirectAccessGrantsEnabled: req.Parameters.DirectAccessGrantsEnabled,
 		ServiceAccountsEnabled:    req.Parameters.ServiceAccountsEnabled,

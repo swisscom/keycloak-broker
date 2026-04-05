@@ -5,6 +5,7 @@ type OIDCClientParameters struct {
 	RedirectURIs              []string          `json:"redirectUris"`
 	PublicClient              bool              `json:"publicClient"`
 	ConsentRequired           bool              `json:"consentRequired"`
+	StandardFlowEnabled       *bool             `json:"standardFlowEnabled,omitempty"`
 	ImplicitFlowEnabled       bool              `json:"implicitFlowEnabled"`
 	DirectAccessGrantsEnabled bool              `json:"directAccessGrantsEnabled"`
 	ServiceAccountsEnabled    bool              `json:"serviceAccountsEnabled"`
@@ -66,6 +67,7 @@ type OIDCClientResponse struct {
 type OIDCClientUpdatePayload struct {
 	RedirectURIs              []string `json:"redirectUris,omitempty"`
 	ConsentRequired           *bool    `json:"consentRequired,omitempty"`
+	StandardFlowEnabled       *bool    `json:"standardFlowEnabled,omitempty"`
 	ImplicitFlowEnabled       *bool    `json:"implicitFlowEnabled,omitempty"`
 	DirectAccessGrantsEnabled *bool    `json:"directAccessGrantsEnabled,omitempty"`
 	ServiceAccountsEnabled    *bool    `json:"serviceAccountsEnabled,omitempty"`

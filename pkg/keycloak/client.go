@@ -72,7 +72,7 @@ func (c *Client) CreateClient(ctx context.Context, instanceId, serviceId, planId
 		PublicClient:              parameters.PublicClient,
 		RedirectURIs:              parameters.RedirectURIs,
 		ConsentRequired:           parameters.ConsentRequired,
-		StandardFlowEnabled:       true,
+		StandardFlowEnabled:       parameters.StandardFlowEnabled == nil || *parameters.StandardFlowEnabled,
 		ImplicitFlowEnabled:       parameters.ImplicitFlowEnabled,
 		DirectAccessGrantsEnabled: parameters.DirectAccessGrantsEnabled,
 		ServiceAccountsEnabled:    parameters.ServiceAccountsEnabled,
@@ -213,6 +213,9 @@ func (c *Client) UpdateClient(ctx context.Context, instanceId string, update *OI
 	}
 	if update.ConsentRequired != nil {
 		merged.ConsentRequired = *update.ConsentRequired
+	}
+	if update.StandardFlowEnabled != nil {
+		merged.StandardFlowEnabled = *update.StandardFlowEnabled
 	}
 	if update.ImplicitFlowEnabled != nil {
 		merged.ImplicitFlowEnabled = *update.ImplicitFlowEnabled
