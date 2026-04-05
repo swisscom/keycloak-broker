@@ -176,34 +176,34 @@ func TestProvisionInstance_NewClient_AllParameters(t *testing.T) {
 		t.Errorf("expected 201, got %d", rec.Code)
 	}
 	if capturedPayload.ClientId != "fe5556b9-8478-409b-ab2b-3c95ba06c5fc" {
-		t.Errorf("expected clientId, got %s", capturedPayload.ClientId)
+		t.Errorf("provision: clientId = %q, want %q", capturedPayload.ClientId, "fe5556b9-8478-409b-ab2b-3c95ba06c5fc")
 	}
 	if capturedPayload.StandardFlowEnabled {
-		t.Error("expected standardFlowEnabled false")
+		t.Errorf("provision: standardFlowEnabled = %v, want false", capturedPayload.StandardFlowEnabled)
 	}
 	if !capturedPayload.ImplicitFlowEnabled {
-		t.Error("expected implicitFlowEnabled true")
+		t.Errorf("provision: implicitFlowEnabled = %v, want true", capturedPayload.ImplicitFlowEnabled)
 	}
 	if !capturedPayload.DirectAccessGrantsEnabled {
-		t.Error("expected directAccessGrantsEnabled true")
+		t.Errorf("provision: directAccessGrantsEnabled = %v, want true", capturedPayload.DirectAccessGrantsEnabled)
 	}
 	if !capturedPayload.ConsentRequired {
-		t.Error("expected consentRequired true")
+		t.Errorf("provision: consentRequired = %v, want true", capturedPayload.ConsentRequired)
 	}
 	if !capturedPayload.ServiceAccountsEnabled {
-		t.Error("expected serviceAccountsEnabled true")
+		t.Errorf("provision: serviceAccountsEnabled = %v, want true", capturedPayload.ServiceAccountsEnabled)
 	}
 	if _, ok := capturedPayload.Attributes["pkce.code.challenge.method"]; ok {
-		t.Error("expected no PKCE attribute when pkceEnabled is false")
+		t.Errorf("provision: pkce.code.challenge.method should not be set when pkceEnabled is false")
 	}
-	if capturedPayload.Attributes["client.session.max.lifespan"] != "600" {
-		t.Errorf("expected refresh token lifetime 600, got %s", capturedPayload.Attributes["client.session.max.lifespan"])
+	if v := capturedPayload.Attributes["client.session.max.lifespan"]; v != "600" {
+		t.Errorf("provision: refreshTokenLifetime = %q, want %q", v, "600")
 	}
-	if capturedPayload.Attributes["access.token.lifespan"] != "300" {
-		t.Errorf("expected access token lifetime 300, got %s", capturedPayload.Attributes["access.token.lifespan"])
+	if v := capturedPayload.Attributes["access.token.lifespan"]; v != "300" {
+		t.Errorf("provision: accessTokenLifetime = %q, want %q", v, "300")
 	}
 	if len(capturedPayload.RedirectURIs) != 1 || capturedPayload.RedirectURIs[0] != "https://myapp.example.com/callback" {
-		t.Errorf("expected redirectURIs [https://myapp.example.com/callback], got %v", capturedPayload.RedirectURIs)
+		t.Errorf("provision: redirectURIs = %v, want [https://myapp.example.com/callback]", capturedPayload.RedirectURIs)
 	}
 }
 
@@ -263,31 +263,31 @@ func TestUpdateInstance_AllParameters(t *testing.T) {
 		t.Errorf("expected 200, got %d", rec.Code)
 	}
 	if capturedPayload.StandardFlowEnabled {
-		t.Error("expected standardFlowEnabled false")
+		t.Errorf("update: standardFlowEnabled = %v, want false", capturedPayload.StandardFlowEnabled)
 	}
 	if !capturedPayload.ImplicitFlowEnabled {
-		t.Error("expected implicitFlowEnabled true")
+		t.Errorf("update: implicitFlowEnabled = %v, want true", capturedPayload.ImplicitFlowEnabled)
 	}
 	if capturedPayload.DirectAccessGrantsEnabled {
-		t.Error("expected directAccessGrantsEnabled false")
+		t.Errorf("update: directAccessGrantsEnabled = %v, want false", capturedPayload.DirectAccessGrantsEnabled)
 	}
 	if !capturedPayload.ConsentRequired {
-		t.Error("expected consentRequired true")
+		t.Errorf("update: consentRequired = %v, want true", capturedPayload.ConsentRequired)
 	}
 	if !capturedPayload.ServiceAccountsEnabled {
-		t.Error("expected serviceAccountsEnabled true")
+		t.Errorf("update: serviceAccountsEnabled = %v, want true", capturedPayload.ServiceAccountsEnabled)
 	}
 	if _, ok := capturedPayload.Attributes["pkce.code.challenge.method"]; ok {
-		t.Error("expected PKCE attribute removed when pkceEnabled is false")
+		t.Errorf("update: pkce.code.challenge.method should not be set when pkceEnabled is false")
 	}
-	if capturedPayload.Attributes["client.session.max.lifespan"] != "900" {
-		t.Errorf("expected refresh token lifetime 900, got %s", capturedPayload.Attributes["client.session.max.lifespan"])
+	if v := capturedPayload.Attributes["client.session.max.lifespan"]; v != "900" {
+		t.Errorf("update: refreshTokenLifetime = %q, want %q", v, "900")
 	}
-	if capturedPayload.Attributes["access.token.lifespan"] != "120" {
-		t.Errorf("expected access token lifetime 120, got %s", capturedPayload.Attributes["access.token.lifespan"])
+	if v := capturedPayload.Attributes["access.token.lifespan"]; v != "120" {
+		t.Errorf("update: accessTokenLifetime = %q, want %q", v, "120")
 	}
 	if len(capturedPayload.RedirectURIs) != 1 || capturedPayload.RedirectURIs[0] != "https://new.example.com/callback" {
-		t.Errorf("expected redirectURIs [https://new.example.com/callback], got %v", capturedPayload.RedirectURIs)
+		t.Errorf("update: redirectURIs = %v, want [https://new.example.com/callback]", capturedPayload.RedirectURIs)
 	}
 }
 
