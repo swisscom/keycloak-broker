@@ -1,0 +1,9 @@
+{
+  "issuer": "http://localhost:8080/realms/dev-realm",
+  "authorization_endpoint": "http://localhost:8080/realms/dev-realm/protocol/openid-connect/auth",
+  "token_endpoint": "http://localhost:8080/realms/dev-realm/protocol/openid-connect/token",
+  "introspection_endpoint": "http://localhost:8080/realms/dev-realm/protocol/openid-connect/token/introspect",
+  "userinfo_endpoint": "http://localhost:8080/realms/dev-realm/protocol/openid-connect/userinfo",
+  "end_session_endpoint": "http://localhost:8080/realms/dev-realm/protocol/openid-connect/logout",
+  "jwks_uri": "http://localhost:8080/realms/dev-realm/protocol/openid-connect/certs"
+}

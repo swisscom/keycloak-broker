@@ -2,12 +2,16 @@ package catalog
 
 import (
 	"os"
+	"sync"
 
 	"github.com/keycloak-broker/pkg/logger"
 	"gopkg.in/yaml.v3"
 )
 
-var catalog Catalog
+var (
+	catalog Catalog
+	once    sync.Once
+)
 
 type Catalog struct {
 	Services []Service `yaml:"services"`
@@ -47,7 +51,7 @@ type PlanMetadata struct {
 	PublicClient        bool `yaml:"publicClient" json:"publicClient,omitempty"`
 }
 
-func init() {
+func load() {
 	data, err := os.ReadFile("catalog.yaml")
 	if err != nil {
 		logger.Fatal("failed to read catalog.yaml: %v", err)
@@ -59,14 +63,17 @@ func init() {
 }
 
 func GetCatalog() map[string]any {
+	once.Do(load)
 	return map[string]any{"services": catalog.Services}
 }
 
 func GetServices() []Service {
+	once.Do(load)
 	return catalog.Services
 }
 
 func IsPublicClient(serviceID, planID string) bool {
+	once.Do(load)
 	for _, svc := range catalog.Services {
 		if svc.ID == serviceID {
 			for _, p := range svc.Plans {
@@ -80,6 +87,7 @@ func IsPublicClient(serviceID, planID string) bool {
 }
 
 func GetPlan(serviceID, planID string) Plan {
+	once.Do(load)
 	for _, svc := range catalog.Services {
 		if svc.ID == serviceID {
 			for _, p := range svc.Plans {

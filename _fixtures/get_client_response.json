@@ -1,0 +1,25 @@
+[{
+  "id": "internal-uuid-1234",
+  "clientId": "fe5556b9-8478-409b-ab2b-3c95ba06c5fc",
+  "name": "fe5556b9-8478-409b-ab2b-3c95ba06c5fc",
+  "description": "standard OIDC client",
+  "enabled": true,
+  "clientAuthenticatorType": "client-secret",
+  "secret": "test-secret-value",
+  "protocol": "openid-connect",
+  "publicClient": false,
+  "redirectUris": ["https://myapp.example.com/callback"],
+  "webOrigins": [],
+  "consentRequired": false,
+  "standardFlowEnabled": true,
+  "implicitFlowEnabled": false,
+  "directAccessGrantsEnabled": true,
+  "serviceAccountsEnabled": false,
+  "attributes": {
+    "service_id": "fff5b36a-da19-4dc2-bd28-3dd331146290",
+    "plan_id": "40627d0f-dedd-4d68-8111-2ebae510ba1b",
+    "pkce.code.challenge.method": "S256",
+    "client.session.max.lifespan": "600",
+    "access.token.lifespan": "300"
+  }
+}]
