@@ -36,13 +36,10 @@ main.go → router → Echo HTTP server
 
 ## Design Decisions
 
-- **Fully stateless** — No local database. The OSB `instance_id` becomes the Keycloak `clientId`. Service and plan IDs are stored as Keycloak client attributes for later retrieval.
-- **Idempotent provisioning** — PUT checks if the client already exists. Returns `200` with existing data if so, `201` on new creation.
-- **In-place updates** — PATCH merges updated parameters (e.g. `redirectURIs`, `implicitFlowEnabled`, `directAccessGrantsEnabled`, `consentRequired`) into the existing client without changing `clientId` or `clientSecret`.
-- **Binding is a no-op** — Bind/unbind intentionally do not cycle client credentials. They return the existing client credentials in a format well-suited for Cloud Foundry compatibility.
-- **Token caching** — Admin tokens are cached with a 15-second safety buffer before expiry.
-- **Discovery caching** — The OIDC `.well-known` discovery response is fetched once and cached for the lifetime of the process.
-- **Shared Keycloak client** — A single `keycloak.Client` instance is shared across health and broker handlers, providing one token cache and one discovery cache.
+- **Fully stateless**: No local database. The OSB `instance_id` becomes the Keycloak `clientId`. Service and plan IDs are stored as Keycloak client attributes for later retrieval.
+- **Idempotent provisioning**: PUT checks if the client already exists. Returns `200` with existing data if so, `201` on new creation.
+- **In-place updates**: PATCH merges updated parameters (e.g. `redirectURIs`, `implicitFlowEnabled`, `directAccessGrantsEnabled`, `consentRequired`, `serviceAccountsEnabled`, `pkceEnabled`, `refreshTokenLifespan`) into the existing client without changing `clientId` or `clientSecret`.
+- **Binding is a no-op**: Bind/unbind intentionally do not cycle client credentials. They return the existing client credentials in a format well-suited for Cloud Foundry compatibility.
 
 ## Service Catalog
 
@@ -52,6 +49,22 @@ Defined in `catalog.yaml`. Ships with one service (`corpid`) and two plans:
 |------|------|-------------|
 | `standard-client` | Confidential | Standard OIDC client with client secret |
 | `public-client` | Public | Public OIDC client (no client secret) |
+
+## OSB Parameters
+
+The following parameters can be passed in the `parameters` object when provisioning (PUT) or updating (PATCH) a service instance:
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `redirectURIs` | `[]string` | `[]` | List of allowed redirect URIs for the OIDC client |
+| `implicitFlowEnabled` | `bool` | `false` | Enable the OAuth 2.0 implicit flow |
+| `directAccessGrantsEnabled` | `bool` | `false` | Enable direct access grants (Resource Owner Password Credentials) |
+| `consentRequired` | `bool` | `false` | Require user consent before granting access |
+| `serviceAccountsEnabled` | `bool` | `false` | Enable service accounts (client credentials grant) |
+| `pkceEnabled` | `bool` | `false` | Enable Proof Key for Code Exchange (PKCE) |
+| `refreshTokenLifespan` | `int` | `0` | Refresh token lifespan in seconds (`0` = use Keycloak realm default) |
+
+On update (PATCH), all parameters are optional. Only provided fields will be merged into the existing client configuration.
 
 ## Configuration
 
