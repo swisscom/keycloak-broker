@@ -46,7 +46,7 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 			DirectAccessGrantsEnabled bool     `json:"directAccessGrantsEnabled"`
 			ConsentRequired           bool     `json:"consentRequired"`
 			ServiceAccountsEnabled    bool     `json:"serviceAccountsEnabled"`
-			PKCEEnabled               bool     `json:"pkceEnabled"`
+			PKCEEnabled               *bool    `json:"pkceEnabled,omitempty"`
 			RefreshTokenLifetime      int      `json:"refreshTokenLifetime,omitempty"`
 			AccessTokenLifetime       int      `json:"accessTokenLifetime,omitempty"`
 		} `json:"parameters"`

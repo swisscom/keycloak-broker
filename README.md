@@ -131,7 +131,7 @@ The following parameters can be passed in the `parameters` object when provision
 | `directAccessGrantsEnabled` | `bool` | `false` | Enable Resource Owner Password Credentials (`direct_access` grant) |
 | `consentRequired` | `bool` | `false` | Require user consent before granting access |
 | `serviceAccountsEnabled` | `bool` | `false` | Enable service accounts (`client_credentials` grant) |
-| `pkceEnabled` | `bool` | `false` | Enable Proof Key for Code Exchange (PKCE) |
+| `pkceEnabled` | `bool` | `true` | Enable Proof Key for Code Exchange (PKCE) |
 | `refreshTokenLifetime` | `int` | `0` | Refresh token lifetime in seconds (`0` = use system default) |
 | `accessTokenLifetime` | `int` | `0` | Access token lifetime in seconds (`0` = use system default) |
 

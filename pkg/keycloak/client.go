@@ -53,7 +53,7 @@ func (c *Client) CreateClient(ctx context.Context, instanceId, serviceId, planId
 	attributes := make(map[string]string)
 	attributes["service_id"] = serviceId
 	attributes["plan_id"] = planId
-	if parameters.PKCEEnabled {
+	if parameters.PKCEEnabled == nil || *parameters.PKCEEnabled {
 		attributes["pkce.code.challenge.method"] = "S256"
 	}
 	if parameters.RefreshTokenLifetime > 0 {
