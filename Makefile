@@ -123,15 +123,15 @@ fetch-instance:
 	curl -v http://disco:dingo@localhost:9999/v2/service_instances/fe5556b9-8478-409b-ab2b-3c95ba06c5fc \
 		-X GET | jq .
 
-.PHONY: test-oidc-login
-## test-oidc-login: test OIDC login with a provisioned client and test user
-test-oidc-login:
-	./scripts/test_oidc_login.sh
+.PHONY: test-oidc-client
+## test-oidc-client: test OIDC client with a provisioned client and test user
+test-oidc-client:
+	./scripts/test_oidc_client.sh
 
-.PHONY: test-public-pkce
-## test-public-pkce: provision a public client with PKCE, test it, then clean up
-test-public-pkce:
-	./scripts/test_public_pkce.sh
+.PHONY: test-public-client
+## test-public-client: provision a public client with PKCE, test it, then clean up
+test-public-client:
+	./scripts/test_public_client.sh
 
 .PHONY: deprovision-instance
 ## deprovision-instance: deletes example service instance

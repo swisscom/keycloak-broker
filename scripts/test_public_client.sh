@@ -26,7 +26,6 @@ curl -sf "$BROKER_URL/v2/service_instances/$INSTANCE_ID" \
     "plan_id": "'"$PLAN_ID"'",
     "parameters": {
       "redirectURIs": ["https://myapp.example.com/callback"],
-      "pkceEnabled": true,
       "directAccessGrantsEnabled": true,
       "refreshTokenLifetime": 699,
       "accessTokenLifetime": 333
