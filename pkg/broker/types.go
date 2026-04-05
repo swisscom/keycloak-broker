@@ -21,7 +21,8 @@ type OSBClientResponseParameters struct {
 	DirectAccessGrantsEnabled bool              `json:"directAccessGrantsEnabled,omitempty"`
 	ServiceAccountsEnabled    bool              `json:"serviceAccountsEnabled,omitempty"`
 	PKCEEnabled               bool              `json:"pkceEnabled,omitempty"`
-	RefreshTokenLifespan      int               `json:"refreshTokenLifespan,omitempty"`
+	RefreshTokenLifetime      int               `json:"refreshTokenLifetime,omitempty"`
+	AccessTokenLifetime       int               `json:"accessTokenLifetime,omitempty"`
 	Issuer                    string            `json:"issuer"`
 	DiscoveryEndpoint         string            `json:"discoveryEndpoint"`
 	AuthorizationEndpoint     string            `json:"authorizationEndpoint"`

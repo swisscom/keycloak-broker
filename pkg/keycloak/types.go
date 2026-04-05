@@ -9,7 +9,8 @@ type OIDCClientParameters struct {
 	DirectAccessGrantsEnabled bool              `json:"directAccessGrantsEnabled"`
 	ServiceAccountsEnabled    bool              `json:"serviceAccountsEnabled"`
 	PKCEEnabled               bool              `json:"pkceEnabled"`
-	RefreshTokenLifespan      int               `json:"refreshTokenLifespan,omitempty"` // seconds
+	RefreshTokenLifetime      int               `json:"refreshTokenLifetime,omitempty"` // seconds
+	AccessTokenLifetime       int               `json:"accessTokenLifetime,omitempty"`  // seconds
 	Attributes                map[string]string `json:"attributes,omitempty"`
 }
 
@@ -69,7 +70,8 @@ type OIDCClientUpdatePayload struct {
 	DirectAccessGrantsEnabled *bool    `json:"directAccessGrantsEnabled,omitempty"`
 	ServiceAccountsEnabled    *bool    `json:"serviceAccountsEnabled,omitempty"`
 	PKCEEnabled               *bool    `json:"pkceEnabled,omitempty"`
-	RefreshTokenLifespan      *int     `json:"refreshTokenLifespan,omitempty"` // seconds
+	RefreshTokenLifetime      *int     `json:"refreshTokenLifetime,omitempty"` // seconds
+	AccessTokenLifetime       *int     `json:"accessTokenLifetime,omitempty"`  // seconds
 }
 
 // OIDCDiscoveryResponse represents a Keycloak OIDC discovery endpoint response.

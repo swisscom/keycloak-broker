@@ -8,7 +8,8 @@ import (
 
 func keycloakClientToOSB(oidcClient *keycloak.OIDCClientResponse) OSBClientResponse {
 	pkceEnabled := oidcClient.Attributes["pkce.code.challenge.method"] == "S256"
-	refreshTokenLifespan, _ := strconv.Atoi(oidcClient.Attributes["client.session.max.lifespan"])
+	refreshTokenLifetime, _ := strconv.Atoi(oidcClient.Attributes["client.session.max.lifespan"])
+	accessTokenLifetime, _ := strconv.Atoi(oidcClient.Attributes["access.token.lifespan"])
 
 	return OSBClientResponse{
 		ServiceId: oidcClient.Attributes["service_id"],
@@ -28,7 +29,8 @@ func keycloakClientToOSB(oidcClient *keycloak.OIDCClientResponse) OSBClientRespo
 			DirectAccessGrantsEnabled: oidcClient.DirectAccessGrantsEnabled,
 			ServiceAccountsEnabled:    oidcClient.ServiceAccountsEnabled,
 			PKCEEnabled:               pkceEnabled,
-			RefreshTokenLifespan:      refreshTokenLifespan,
+			RefreshTokenLifetime:      refreshTokenLifetime,
+			AccessTokenLifetime:       accessTokenLifetime,
 			Issuer:                    oidcClient.Issuer,
 			DiscoveryEndpoint:         oidcClient.DiscoveryEndpoint,
 			AuthorizationEndpoint:     oidcClient.AuthorizationEndpoint,

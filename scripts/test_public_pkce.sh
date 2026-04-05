@@ -28,7 +28,8 @@ curl -sf "$BROKER_URL/v2/service_instances/$INSTANCE_ID" \
       "redirectURIs": ["https://myapp.example.com/callback"],
       "pkceEnabled": true,
       "directAccessGrantsEnabled": true,
-      "refreshTokenLifespan": 699
+      "refreshTokenLifetime": 699,
+      "accessTokenLifetime": 333
     }
   }' | jq .
 
@@ -53,13 +54,21 @@ if [ "$PUBLIC" != "true" ]; then
 fi
 echo "PASS: publicClient is true"
 
-# verify refresh token lifespan
-RTL=$(echo "$INSTANCE" | jq -r '.parameters.refreshTokenLifespan')
+# verify refresh token lifetime
+RTL=$(echo "$INSTANCE" | jq -r '.parameters.refreshTokenLifetime')
 if [ "$RTL" != "699" ]; then
-  echo "FAIL: refreshTokenLifespan expected 699, got $RTL"
+  echo "FAIL: refreshTokenLifetime expected 699, got $RTL"
   exit 1
 fi
-echo "PASS: refreshTokenLifespan is 699"
+echo "PASS: refreshTokenLifetime is 699"
+
+# verify access token lifetime
+ATL=$(echo "$INSTANCE" | jq -r '.parameters.accessTokenLifetime')
+if [ "$ATL" != "333" ]; then
+  echo "FAIL: accessTokenLifetime expected 333, got $ATL"
+  exit 1
+fi
+echo "PASS: accessTokenLifetime is 333"
 
 echo ""
 echo "=== Creating binding ==="

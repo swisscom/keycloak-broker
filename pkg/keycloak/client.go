@@ -56,8 +56,11 @@ func (c *Client) CreateClient(ctx context.Context, instanceId, serviceId, planId
 	if parameters.PKCEEnabled {
 		attributes["pkce.code.challenge.method"] = "S256"
 	}
-	if parameters.RefreshTokenLifespan > 0 {
-		attributes["client.session.max.lifespan"] = fmt.Sprintf("%d", parameters.RefreshTokenLifespan)
+	if parameters.RefreshTokenLifetime > 0 {
+		attributes["client.session.max.lifespan"] = fmt.Sprintf("%d", parameters.RefreshTokenLifetime)
+	}
+	if parameters.AccessTokenLifetime > 0 {
+		attributes["access.token.lifespan"] = fmt.Sprintf("%d", parameters.AccessTokenLifetime)
 	}
 
 	oidc := OIDCClientPayload{
@@ -230,14 +233,24 @@ func (c *Client) UpdateClient(ctx context.Context, instanceId string, update *OI
 			delete(merged.Attributes, "pkce.code.challenge.method")
 		}
 	}
-	if update.RefreshTokenLifespan != nil {
+	if update.RefreshTokenLifetime != nil {
 		if merged.Attributes == nil {
 			merged.Attributes = make(map[string]string)
 		}
-		if *update.RefreshTokenLifespan > 0 {
-			merged.Attributes["client.session.max.lifespan"] = fmt.Sprintf("%d", *update.RefreshTokenLifespan)
+		if *update.RefreshTokenLifetime > 0 {
+			merged.Attributes["client.session.max.lifespan"] = fmt.Sprintf("%d", *update.RefreshTokenLifetime)
 		} else {
 			delete(merged.Attributes, "client.session.max.lifespan")
+		}
+	}
+	if update.AccessTokenLifetime != nil {
+		if merged.Attributes == nil {
+			merged.Attributes = make(map[string]string)
+		}
+		if *update.AccessTokenLifetime > 0 {
+			merged.Attributes["access.token.lifespan"] = fmt.Sprintf("%d", *update.AccessTokenLifetime)
+		} else {
+			delete(merged.Attributes, "access.token.lifespan")
 		}
 	}
 
