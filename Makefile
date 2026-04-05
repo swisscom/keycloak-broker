@@ -128,6 +128,11 @@ fetch-instance:
 test-oidc-login:
 	./scripts/test_oidc_login.sh
 
+.PHONY: test-public-pkce
+## test-public-pkce: provision a public client with PKCE, test it, then clean up
+test-public-pkce:
+	./scripts/test_public_pkce.sh
+
 .PHONY: deprovision-instance
 ## deprovision-instance: deletes example service instance
 deprovision-instance:
