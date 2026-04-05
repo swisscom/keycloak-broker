@@ -31,7 +31,6 @@ type OSBClientResponseParameters struct {
 	UserInfoEndpoint          string            `json:"userInfoEndpoint"`
 	EndSessionEndpoint        string            `json:"endSessionEndpoint"`
 	JWKSURI                   string            `json:"jwksURI"`
-	Attributes                map[string]string `json:"attributes,omitempty"`
 }
 
 // OSBBindingResponse represents an OSB API response of a service instance binding.

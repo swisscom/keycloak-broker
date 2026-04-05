@@ -99,7 +99,7 @@ func (c *Client) CreateClient(ctx context.Context, instanceId, serviceId, planId
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusConflict {
-		return nil, fmt.Errorf("client with instance_id [%s] already exists", instanceId)
+		return nil, fmt.Errorf("client with instance_id [%s] already exists: %w", instanceId, ErrConflict)
 	}
 	if resp.StatusCode != http.StatusCreated {
 		respBody, _ := io.ReadAll(resp.Body)

@@ -38,7 +38,7 @@ main.go → router → Echo HTTP server
 
 - **Fully stateless**: No local database. The OSB `instance_id` becomes the Keycloak `clientId`. Service and plan IDs are stored as Keycloak client attributes for later retrieval.
 - **Idempotent provisioning**: PUT checks if the client already exists. Returns `200` with existing data if so, `201` on new creation.
-- **In-place updates**: PATCH merges updated parameters (e.g. `redirectURIs`, `implicitFlowEnabled`, `directAccessGrantsEnabled`, `consentRequired`, `serviceAccountsEnabled`, `pkceEnabled`, `refreshTokenLifespan`) into the existing client without changing `clientId` or `clientSecret`.
+- **In-place updates**: PATCH merges updated parameters (e.g. `redirectURIs`, `standardFlowEnabled`, `implicitFlowEnabled`, `directAccessGrantsEnabled`, `consentRequired`, `serviceAccountsEnabled`, `pkceEnabled`, `refreshTokenLifetime`, `accessTokenLifetime`) into the existing client without changing `clientId` or `clientSecret`.
 - **Binding is a no-op**: Bind/unbind intentionally do not cycle client credentials. They return the existing client credentials in a format well-suited for Cloud Foundry compatibility.
 
 ## Service Catalog

@@ -57,9 +57,8 @@ func ValidateServiceID(serviceId string) error {
 		return &ValidationError{"service_id", "must be valid UUID"}
 	}
 
-	cat := catalog.GetCatalog()
-	services := cat["services"].([]catalog.Service)
-	for _, svc := range services {
+	cat := catalog.GetServices()
+	for _, svc := range cat {
 		if svc.ID == serviceId {
 			return nil
 		}
@@ -78,9 +77,8 @@ func ValidatePlanID(serviceId, planId string) error {
 		return &ValidationError{"plan_id", "must be valid UUID"}
 	}
 
-	cat := catalog.GetCatalog()
-	services := cat["services"].([]catalog.Service)
-	for _, svc := range services {
+	cat := catalog.GetServices()
+	for _, svc := range cat {
 		if svc.ID == serviceId {
 			for _, plan := range svc.Plans {
 				if plan.ID == planId {

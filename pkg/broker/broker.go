@@ -1,7 +1,6 @@
 package broker
 
 import (
-	"context"
 	"errors"
 	"net/http"
 
@@ -68,7 +67,7 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 
 	// check first if instance_id already exists
 	logger.Debug("checking if instance_id [%s] exists", instanceId)
-	client, err := b.client.GetClient(context.Background(), instanceId)
+	client, err := b.client.GetClient(c.Request().Context(), instanceId)
 	if err != nil {
 		if !errors.Is(err, keycloak.ErrNotFound) {
 			logger.Error("failed to get instance_id [%s]: %v", instanceId, err)
@@ -81,7 +80,7 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 		return c.JSON(http.StatusOK, keycloakClientToOSB(client))
 	}
 
-	client, err = b.client.CreateClient(context.Background(),
+	client, err = b.client.CreateClient(c.Request().Context(),
 		instanceId, req.ServiceID, req.PlanID,
 		&keycloak.OIDCClientParameters{
 			RedirectURIs:              req.Parameters.RedirectURIs,
@@ -113,7 +112,7 @@ func (b *Broker) GetInstance(c echo.Context) error {
 	}
 
 	logger.Debug("checking if instance_id [%s] exists", instanceId)
-	client, err := b.client.GetClient(context.Background(), instanceId)
+	client, err := b.client.GetClient(c.Request().Context(), instanceId)
 	if err != nil {
 		if errors.Is(err, keycloak.ErrNotFound) {
 			logger.Debug("instance_id [%s] not found", instanceId)
@@ -133,7 +132,7 @@ func (b *Broker) DeprovisionInstance(c echo.Context) error {
 	}
 
 	logger.Info("deprovision instance_id [%s]", instanceId)
-	err := b.client.DeleteClient(context.Background(), instanceId)
+	err := b.client.DeleteClient(c.Request().Context(), instanceId)
 	if err != nil {
 		if errors.Is(err, keycloak.ErrNotFound) {
 			logger.Debug("instance_id [%s] not found, already gone", instanceId)
@@ -186,7 +185,7 @@ func (b *Broker) UpdateInstance(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "validation", "description": err.Error()})
 	}
 
-	client, err := b.client.UpdateClient(context.Background(), instanceId, &keycloak.OIDCClientUpdatePayload{
+	client, err := b.client.UpdateClient(c.Request().Context(), instanceId, &keycloak.OIDCClientUpdatePayload{
 		RedirectURIs:              req.Parameters.RedirectURIs,
 		ConsentRequired:           req.Parameters.ConsentRequired,
 		StandardFlowEnabled:       req.Parameters.StandardFlowEnabled,
@@ -224,7 +223,7 @@ func (b *Broker) BindInstance(c echo.Context) error {
 	}
 
 	logger.Debug("checking if instance_id [%s] exists", instanceId)
-	client, err := b.client.GetClient(context.Background(), instanceId)
+	client, err := b.client.GetClient(c.Request().Context(), instanceId)
 	if err != nil {
 		if errors.Is(err, keycloak.ErrNotFound) {
 			logger.Debug("instance_id [%s] not found", instanceId)

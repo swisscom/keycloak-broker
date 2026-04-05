@@ -12,6 +12,7 @@ import (
 )
 
 var ErrNotFound = fmt.Errorf("not found")
+var ErrConflict = fmt.Errorf("conflict")
 
 type tokenResponse struct {
 	AccessToken string `json:"access_token"`

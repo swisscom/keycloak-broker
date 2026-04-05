@@ -62,6 +62,10 @@ func GetCatalog() map[string]any {
 	return map[string]any{"services": catalog.Services}
 }
 
+func GetServices() []Service {
+	return catalog.Services
+}
+
 func IsPublicClient(serviceID, planID string) bool {
 	for _, svc := range catalog.Services {
 		if svc.ID == serviceID {

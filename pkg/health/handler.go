@@ -1,7 +1,6 @@
 package health
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/keycloak-broker/pkg/keycloak"
@@ -31,7 +30,7 @@ func (h *Handler) healthz(c echo.Context) error {
 			"status": "unhealthy",
 		})
 	}
-	if err := h.client.HealthCheck(context.Background()); err != nil {
+	if err := h.client.HealthCheck(c.Request().Context()); err != nil {
 		return c.JSON(http.StatusServiceUnavailable, map[string]any{
 			"status": "unhealthy",
 			"reason": err.Error(),
