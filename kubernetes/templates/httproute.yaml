@@ -18,4 +18,4 @@ spec:
   - backendRefs:
     - name: {{ .Release.Name }}
       kind: Service
-      port: 8080
+      port: {{ .Values.broker.configuration.port }}

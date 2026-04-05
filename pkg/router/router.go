@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/keycloak-broker/pkg/broker"
@@ -56,4 +57,8 @@ func New() *Router {
 
 func (r *Router) Start(port int) error {
 	return r.echo.Start(fmt.Sprintf(":%d", port))
+}
+
+func (r *Router) Shutdown(ctx context.Context) error {
+	return r.echo.Shutdown(ctx)
 }

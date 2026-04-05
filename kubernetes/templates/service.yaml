@@ -9,10 +9,10 @@ metadata:
   name: {{ .Release.Name }}
 spec:
   ports:
-  - port: 8080
+  - port: {{ .Values.broker.configuration.port }}
     name: web
     protocol: TCP
-    targetPort: 8080
+    targetPort: {{ .Values.broker.configuration.port }}
   selector:
     app: {{ .Release.Name }}
     app.kubernetes.io/component: app

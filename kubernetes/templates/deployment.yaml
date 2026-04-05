@@ -24,7 +24,7 @@ spec:
         app.kubernetes.io/name: keycloak-broker
       annotations:
         prometheus.io/path: "/metrics"
-        prometheus.io/port: "8080"
+        prometheus.io/port: "{{ .Values.broker.configuration.port }}"
         prometheus.io/scrape: "true"
         reloader.stakater.com/auto: "true"
     spec:
@@ -37,19 +37,19 @@ spec:
         image: {{ .Values.broker.image.repository }}:{{ .Values.broker.image.tag }}
         imagePullPolicy: {{ .Values.broker.image.pullPolicy }}
         ports:
-        - containerPort: 8080
+        - containerPort: {{ .Values.broker.configuration.port }}
           name: web
           protocol: TCP
         readinessProbe:
           httpGet:
             path: /health
-            port: 8080
+            port: {{ .Values.broker.configuration.port }}
           initialDelaySeconds: 15
           periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /health
-            port: 8080
+            port: {{ .Values.broker.configuration.port }}
           initialDelaySeconds: 15
           periodSeconds: 10
         env:
