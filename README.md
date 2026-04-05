@@ -26,7 +26,7 @@ main.go → router → Echo HTTP server
 |---------|---------|
 | `config` | Singleton configuration from environment variables |
 | `logger` | Thin wrapper around `slog` with printf-style helpers |
-| `catalog` | Loads `catalog.yaml` at startup, provides service/plan lookups |
+| `catalog` | Loads `catalog.yaml` on first access, provides service/plan lookups |
 | `validation` | UUID format and catalog membership validation |
 | `keycloak` | HTTP client for Keycloak Admin API (token management, CRUD, OIDC discovery caching) |
 | `broker` | OSB API handlers + Keycloak ↔ OSB response mapping |
@@ -210,12 +210,14 @@ make init            # initializes and updates all golang module vendoring
 make install-air     # installs "air" hot-reloader
 ```
 
-## Complete test flow with an OIDC client
+## Complete test flow with OIDC clients
 
 ```bash
 make start-keycloak
 make run
 make provision-instance
 make bind-instance
-make test-oidc-login
+make deprovision-instance
+make test-oidc-client
+make test-public-client
 ```
