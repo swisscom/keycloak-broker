@@ -20,6 +20,8 @@ type OSBClientResponseParameters struct {
 	ImplicitFlowEnabled       bool              `json:"implicitFlowEnabled,omitempty"`
 	DirectAccessGrantsEnabled bool              `json:"directAccessGrantsEnabled,omitempty"`
 	ServiceAccountsEnabled    bool              `json:"serviceAccountsEnabled,omitempty"`
+	PKCEEnabled               bool              `json:"pkceEnabled,omitempty"`
+	RefreshTokenLifespan      int               `json:"refreshTokenLifespan,omitempty"`
 	Issuer                    string            `json:"issuer"`
 	DiscoveryEndpoint         string            `json:"discoveryEndpoint"`
 	AuthorizationEndpoint     string            `json:"authorizationEndpoint"`

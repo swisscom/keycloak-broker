@@ -1,10 +1,15 @@
 package broker
 
 import (
+	"strconv"
+
 	"github.com/keycloak-broker/pkg/keycloak"
 )
 
 func keycloakClientToOSB(oidcClient *keycloak.OIDCClientResponse) OSBClientResponse {
+	pkceEnabled := oidcClient.Attributes["pkce.code.challenge.method"] == "S256"
+	refreshTokenLifespan, _ := strconv.Atoi(oidcClient.Attributes["client.session.max.lifespan"])
+
 	return OSBClientResponse{
 		ServiceId: oidcClient.Attributes["service_id"],
 		PlanId:    oidcClient.Attributes["plan_id"],
@@ -22,6 +27,8 @@ func keycloakClientToOSB(oidcClient *keycloak.OIDCClientResponse) OSBClientRespo
 			ImplicitFlowEnabled:       oidcClient.ImplicitFlowEnabled,
 			DirectAccessGrantsEnabled: oidcClient.DirectAccessGrantsEnabled,
 			ServiceAccountsEnabled:    oidcClient.ServiceAccountsEnabled,
+			PKCEEnabled:               pkceEnabled,
+			RefreshTokenLifespan:      refreshTokenLifespan,
 			Issuer:                    oidcClient.Issuer,
 			DiscoveryEndpoint:         oidcClient.DiscoveryEndpoint,
 			AuthorizationEndpoint:     oidcClient.AuthorizationEndpoint,

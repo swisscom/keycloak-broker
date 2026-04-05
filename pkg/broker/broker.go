@@ -44,6 +44,9 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 			ImplicitFlowEnabled       bool     `json:"implicitFlowEnabled"`
 			DirectAccessGrantsEnabled bool     `json:"directAccessGrantsEnabled"`
 			ConsentRequired           bool     `json:"consentRequired"`
+			ServiceAccountsEnabled    bool     `json:"serviceAccountsEnabled"`
+			PKCEEnabled               bool     `json:"pkceEnabled"`
+			RefreshTokenLifespan      int      `json:"refreshTokenLifespan,omitempty"`
 		} `json:"parameters"`
 	}
 	if err := c.Bind(&req); err != nil {
@@ -84,6 +87,9 @@ func (b *Broker) ProvisionInstance(c echo.Context) error {
 			ImplicitFlowEnabled:       req.Parameters.ImplicitFlowEnabled,
 			DirectAccessGrantsEnabled: req.Parameters.DirectAccessGrantsEnabled,
 			ConsentRequired:           req.Parameters.ConsentRequired,
+			ServiceAccountsEnabled:    req.Parameters.ServiceAccountsEnabled,
+			PKCEEnabled:               req.Parameters.PKCEEnabled,
+			RefreshTokenLifespan:      req.Parameters.RefreshTokenLifespan,
 		})
 	if err != nil {
 		logger.Error("failed to provision instance_id [%s]: %v", instanceId, err)
@@ -151,9 +157,12 @@ func (b *Broker) UpdateInstance(c echo.Context) error {
 		Context    map[string]any `json:"context"`
 		Parameters struct {
 			RedirectURIs              []string `json:"redirectURIs"`
-			ImplicitFlowEnabled       bool     `json:"implicitFlowEnabled"`
-			DirectAccessGrantsEnabled bool     `json:"directAccessGrantsEnabled"`
-			ConsentRequired           bool     `json:"consentRequired"`
+			ImplicitFlowEnabled       *bool    `json:"implicitFlowEnabled,omitempty"`
+			DirectAccessGrantsEnabled *bool    `json:"directAccessGrantsEnabled,omitempty"`
+			ConsentRequired           *bool    `json:"consentRequired,omitempty"`
+			ServiceAccountsEnabled    *bool    `json:"serviceAccountsEnabled,omitempty"`
+			PKCEEnabled               *bool    `json:"pkceEnabled,omitempty"`
+			RefreshTokenLifespan      *int     `json:"refreshTokenLifespan,omitempty"`
 		} `json:"parameters"`
 	}
 	if err := c.Bind(&req); err != nil {
@@ -176,6 +185,9 @@ func (b *Broker) UpdateInstance(c echo.Context) error {
 		ConsentRequired:           req.Parameters.ConsentRequired,
 		ImplicitFlowEnabled:       req.Parameters.ImplicitFlowEnabled,
 		DirectAccessGrantsEnabled: req.Parameters.DirectAccessGrantsEnabled,
+		ServiceAccountsEnabled:    req.Parameters.ServiceAccountsEnabled,
+		PKCEEnabled:               req.Parameters.PKCEEnabled,
+		RefreshTokenLifespan:      req.Parameters.RefreshTokenLifespan,
 	})
 	if err != nil {
 		if errors.Is(err, keycloak.ErrNotFound) {

@@ -30,7 +30,8 @@ curl -X POST "$KEYCLOAK_URL/admin/realms/$REALM/clients" \
     "redirectUris": ["'"$REDIRECT_URI"'"],
     "standardFlowEnabled": true,
     "directAccessGrantsEnabled": false,
-    "serviceAccountsEnabled": false
+    "serviceAccountsEnabled": false,
+    "attributes": {"pkce.code.challenge.method": "S256"}
   }'
 
 # client secret

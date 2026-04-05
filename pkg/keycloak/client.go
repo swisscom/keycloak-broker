@@ -43,7 +43,7 @@ func NewClient() *Client {
 }
 
 // CreateClient creates an OIDC client in Keycloak and returns it.
-func (c *Client) CreateClient(ctx context.Context, instanceId, serviceId, planId string, paramaters *OIDCClientParameters) (*OIDCClientResponse, error) {
+func (c *Client) CreateClient(ctx context.Context, instanceId, serviceId, planId string, parameters *OIDCClientParameters) (*OIDCClientResponse, error) {
 	token, err := c.getToken(ctx)
 	if err != nil {
 		return nil, err
@@ -53,6 +53,12 @@ func (c *Client) CreateClient(ctx context.Context, instanceId, serviceId, planId
 	attributes := make(map[string]string)
 	attributes["service_id"] = serviceId
 	attributes["plan_id"] = planId
+	if parameters.PKCEEnabled {
+		attributes["pkce.code.challenge.method"] = "S256"
+	}
+	if parameters.RefreshTokenLifespan > 0 {
+		attributes["client.session.max.lifespan"] = fmt.Sprintf("%d", parameters.RefreshTokenLifespan)
+	}
 
 	oidc := OIDCClientPayload{
 		ClientId:                  instanceId,
@@ -60,13 +66,13 @@ func (c *Client) CreateClient(ctx context.Context, instanceId, serviceId, planId
 		Description:               catalog.GetPlan(serviceId, planId).Description,
 		Enabled:                   true,
 		Protocol:                  "openid-connect",
-		PublicClient:              paramaters.PublicClient,
-		RedirectURIs:              paramaters.RedirectURIs,
-		ConsentRequired:           paramaters.ConsentRequired,
+		PublicClient:              parameters.PublicClient,
+		RedirectURIs:              parameters.RedirectURIs,
+		ConsentRequired:           parameters.ConsentRequired,
 		StandardFlowEnabled:       true,
-		ImplicitFlowEnabled:       paramaters.ImplicitFlowEnabled,
-		DirectAccessGrantsEnabled: paramaters.DirectAccessGrantsEnabled,
-		ServiceAccountsEnabled:    false,
+		ImplicitFlowEnabled:       parameters.ImplicitFlowEnabled,
+		DirectAccessGrantsEnabled: parameters.DirectAccessGrantsEnabled,
+		ServiceAccountsEnabled:    parameters.ServiceAccountsEnabled,
 		Attributes:                attributes,
 	}
 	body, err := json.Marshal(oidc)
@@ -202,9 +208,38 @@ func (c *Client) UpdateClient(ctx context.Context, instanceId string, update *OI
 	if update.RedirectURIs != nil {
 		merged.RedirectURIs = update.RedirectURIs
 	}
-	merged.ConsentRequired = update.ConsentRequired
-	merged.ImplicitFlowEnabled = update.ImplicitFlowEnabled
-	merged.DirectAccessGrantsEnabled = update.DirectAccessGrantsEnabled
+	if update.ConsentRequired != nil {
+		merged.ConsentRequired = *update.ConsentRequired
+	}
+	if update.ImplicitFlowEnabled != nil {
+		merged.ImplicitFlowEnabled = *update.ImplicitFlowEnabled
+	}
+	if update.DirectAccessGrantsEnabled != nil {
+		merged.DirectAccessGrantsEnabled = *update.DirectAccessGrantsEnabled
+	}
+	if update.ServiceAccountsEnabled != nil {
+		merged.ServiceAccountsEnabled = *update.ServiceAccountsEnabled
+	}
+	if update.PKCEEnabled != nil {
+		if merged.Attributes == nil {
+			merged.Attributes = make(map[string]string)
+		}
+		if *update.PKCEEnabled {
+			merged.Attributes["pkce.code.challenge.method"] = "S256"
+		} else {
+			delete(merged.Attributes, "pkce.code.challenge.method")
+		}
+	}
+	if update.RefreshTokenLifespan != nil {
+		if merged.Attributes == nil {
+			merged.Attributes = make(map[string]string)
+		}
+		if *update.RefreshTokenLifespan > 0 {
+			merged.Attributes["client.session.max.lifespan"] = fmt.Sprintf("%d", *update.RefreshTokenLifespan)
+		} else {
+			delete(merged.Attributes, "client.session.max.lifespan")
+		}
+	}
 
 	body, err := json.Marshal(merged)
 	if err != nil {

@@ -106,7 +106,7 @@ health-check:
 provision-instance:
 	curl -v http://disco:dingo@localhost:9999/v2/service_instances/fe5556b9-8478-409b-ab2b-3c95ba06c5fc \
 		-X PUT -H "Content-Type: application/json" \
-		-d '{ "service_id":"fff5b36a-da19-4dc2-bd28-3dd331146290", "plan_id":"40627d0f-dedd-4d68-8111-2ebae510ba1b", "parameters": { "redirectURIs": ["https://myapp.example.com/callback"], "directAccessGrantsEnabled": true } }' \
+		-d '{ "service_id":"fff5b36a-da19-4dc2-bd28-3dd331146290", "plan_id":"40627d0f-dedd-4d68-8111-2ebae510ba1b", "parameters": { "redirectURIs": ["https://myapp.example.com/callback"], "directAccessGrantsEnabled": true, "pkceEnabled": true } }' \
 		| jq .
 
 .PHONY: update-instance
@@ -114,7 +114,7 @@ provision-instance:
 update-instance:
 	curl -v http://disco:dingo@localhost:9999/v2/service_instances/fe5556b9-8478-409b-ab2b-3c95ba06c5fc \
 		-X PATCH -H "Content-Type: application/json" \
-		-d '{ "service_id":"fff5b36a-da19-4dc2-bd28-3dd331146290", "plan_id":"40627d0f-dedd-4d68-8111-2ebae510ba1b", "parameters": { "redirectURIs": ["https://myapp.example.com/callback", "https://my-other-app.example.com/oauth2/callback"], "directAccessGrantsEnabled": false, "implicitFlowEnabled": true } }' \
+		-d '{ "service_id":"fff5b36a-da19-4dc2-bd28-3dd331146290", "plan_id":"40627d0f-dedd-4d68-8111-2ebae510ba1b", "parameters": { "redirectURIs": ["https://myapp.example.com/callback", "https://my-other-app.example.com/oauth2/callback"], "directAccessGrantsEnabled": false, "implicitFlowEnabled": true, "pkceEnabled": true } }' \
 		| jq .
 
 .PHONY: fetch-instance

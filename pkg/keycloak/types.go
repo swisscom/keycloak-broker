@@ -7,6 +7,9 @@ type OIDCClientParameters struct {
 	ConsentRequired           bool              `json:"consentRequired"`
 	ImplicitFlowEnabled       bool              `json:"implicitFlowEnabled"`
 	DirectAccessGrantsEnabled bool              `json:"directAccessGrantsEnabled"`
+	ServiceAccountsEnabled    bool              `json:"serviceAccountsEnabled"`
+	PKCEEnabled               bool              `json:"pkceEnabled"`
+	RefreshTokenLifespan      int               `json:"refreshTokenLifespan,omitempty"` // seconds
 	Attributes                map[string]string `json:"attributes,omitempty"`
 }
 
@@ -61,9 +64,12 @@ type OIDCClientResponse struct {
 // OIDCClientUpdatePayload represents a Keycloak OIDC client update payload for the admin API.
 type OIDCClientUpdatePayload struct {
 	RedirectURIs              []string `json:"redirectUris,omitempty"`
-	ConsentRequired           bool     `json:"consentRequired"`
-	ImplicitFlowEnabled       bool     `json:"implicitFlowEnabled"`
-	DirectAccessGrantsEnabled bool     `json:"directAccessGrantsEnabled"`
+	ConsentRequired           *bool    `json:"consentRequired,omitempty"`
+	ImplicitFlowEnabled       *bool    `json:"implicitFlowEnabled,omitempty"`
+	DirectAccessGrantsEnabled *bool    `json:"directAccessGrantsEnabled,omitempty"`
+	ServiceAccountsEnabled    *bool    `json:"serviceAccountsEnabled,omitempty"`
+	PKCEEnabled               *bool    `json:"pkceEnabled,omitempty"`
+	RefreshTokenLifespan      *int     `json:"refreshTokenLifespan,omitempty"` // seconds
 }
 
 // OIDCDiscoveryResponse represents a Keycloak OIDC discovery endpoint response.
