@@ -2,6 +2,7 @@ package broker
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -110,6 +111,183 @@ func TestProvisionInstance_Success(t *testing.T) {
 	json.Unmarshal(rec.Body.Bytes(), &body)
 	if body.Parameters.ClientId != "fe5556b9-8478-409b-ab2b-3c95ba06c5fc" {
 		t.Errorf("unexpected clientId: %s", body.Parameters.ClientId)
+	}
+}
+
+func TestProvisionInstance_NewClient_AllParameters(t *testing.T) {
+	discoveryJSON := loadFixture(t, "_fixtures/discovery_response.json")
+	clientsJSON := loadFixture(t, "_fixtures/get_client_response.json")
+
+	var capturedPayload keycloak.OIDCClientPayload
+	getCalls := 0
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/admin/realms/dev-realm/clients" && r.Method == http.MethodGet:
+			getCalls++
+			w.Header().Set("Content-Type", "application/json")
+			if getCalls == 1 {
+				w.Write([]byte("[]"))
+			} else {
+				w.Write(clientsJSON)
+			}
+		case r.URL.Path == "/admin/realms/dev-realm/clients" && r.Method == http.MethodPost:
+			raw, _ := io.ReadAll(r.Body)
+			json.Unmarshal(raw, &capturedPayload)
+			w.WriteHeader(http.StatusCreated)
+		case r.URL.Path == "/realms/dev-realm/.well-known/openid-configuration":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(discoveryJSON)
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+
+	e := echo.New()
+	payload := `{
+		"service_id": "fff5b36a-da19-4dc2-bd28-3dd331146290",
+		"plan_id": "40627d0f-dedd-4d68-8111-2ebae510ba1b",
+		"parameters": {
+			"redirectURIs": ["https://myapp.example.com/callback"],
+			"standardFlowEnabled": false,
+			"implicitFlowEnabled": true,
+			"directAccessGrantsEnabled": true,
+			"consentRequired": true,
+			"serviceAccountsEnabled": true,
+			"pkceEnabled": false,
+			"refreshTokenLifetime": 600,
+			"accessTokenLifetime": 300
+		}
+	}`
+	req := httptest.NewRequest(http.MethodPut, "/v2/service_instances/fe5556b9-8478-409b-ab2b-3c95ba06c5fc", strings.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("instance_id")
+	c.SetParamValues("fe5556b9-8478-409b-ab2b-3c95ba06c5fc")
+
+	kc, srv := newTestKeycloakClient(http.HandlerFunc(handler))
+	defer srv.Close()
+	b := NewBroker(kc)
+
+	if err := b.ProvisionInstance(c); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if rec.Code != http.StatusCreated {
+		t.Errorf("expected 201, got %d", rec.Code)
+	}
+	if capturedPayload.ClientId != "fe5556b9-8478-409b-ab2b-3c95ba06c5fc" {
+		t.Errorf("expected clientId, got %s", capturedPayload.ClientId)
+	}
+	if capturedPayload.StandardFlowEnabled {
+		t.Error("expected standardFlowEnabled false")
+	}
+	if !capturedPayload.ImplicitFlowEnabled {
+		t.Error("expected implicitFlowEnabled true")
+	}
+	if !capturedPayload.DirectAccessGrantsEnabled {
+		t.Error("expected directAccessGrantsEnabled true")
+	}
+	if !capturedPayload.ConsentRequired {
+		t.Error("expected consentRequired true")
+	}
+	if !capturedPayload.ServiceAccountsEnabled {
+		t.Error("expected serviceAccountsEnabled true")
+	}
+	if _, ok := capturedPayload.Attributes["pkce.code.challenge.method"]; ok {
+		t.Error("expected no PKCE attribute when pkceEnabled is false")
+	}
+	if capturedPayload.Attributes["client.session.max.lifespan"] != "600" {
+		t.Errorf("expected refresh token lifetime 600, got %s", capturedPayload.Attributes["client.session.max.lifespan"])
+	}
+	if capturedPayload.Attributes["access.token.lifespan"] != "300" {
+		t.Errorf("expected access token lifetime 300, got %s", capturedPayload.Attributes["access.token.lifespan"])
+	}
+	if len(capturedPayload.RedirectURIs) != 1 || capturedPayload.RedirectURIs[0] != "https://myapp.example.com/callback" {
+		t.Errorf("expected redirectURIs [https://myapp.example.com/callback], got %v", capturedPayload.RedirectURIs)
+	}
+}
+
+func TestUpdateInstance_AllParameters(t *testing.T) {
+	discoveryJSON := loadFixture(t, "_fixtures/discovery_response.json")
+	clientsJSON := loadFixture(t, "_fixtures/get_client_response.json")
+
+	var capturedPayload keycloak.OIDCClientPayload
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/admin/realms/dev-realm/clients" && r.Method == http.MethodGet:
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(clientsJSON)
+		case strings.HasPrefix(r.URL.Path, "/admin/realms/dev-realm/clients/") && r.Method == http.MethodPut:
+			raw, _ := io.ReadAll(r.Body)
+			json.Unmarshal(raw, &capturedPayload)
+			w.WriteHeader(http.StatusNoContent)
+		case r.URL.Path == "/realms/dev-realm/.well-known/openid-configuration":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(discoveryJSON)
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+
+	e := echo.New()
+	payload := `{
+		"service_id": "fff5b36a-da19-4dc2-bd28-3dd331146290",
+		"plan_id": "40627d0f-dedd-4d68-8111-2ebae510ba1b",
+		"parameters": {
+			"redirectURIs": ["https://new.example.com/callback"],
+			"standardFlowEnabled": false,
+			"implicitFlowEnabled": true,
+			"directAccessGrantsEnabled": false,
+			"consentRequired": true,
+			"serviceAccountsEnabled": true,
+			"pkceEnabled": false,
+			"refreshTokenLifetime": 900,
+			"accessTokenLifetime": 120
+		}
+	}`
+	req := httptest.NewRequest(http.MethodPatch, "/v2/service_instances/fe5556b9-8478-409b-ab2b-3c95ba06c5fc", strings.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("instance_id")
+	c.SetParamValues("fe5556b9-8478-409b-ab2b-3c95ba06c5fc")
+
+	kc, srv := newTestKeycloakClient(http.HandlerFunc(handler))
+	defer srv.Close()
+	b := NewBroker(kc)
+
+	if err := b.UpdateInstance(c); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected 200, got %d", rec.Code)
+	}
+	if capturedPayload.StandardFlowEnabled {
+		t.Error("expected standardFlowEnabled false")
+	}
+	if !capturedPayload.ImplicitFlowEnabled {
+		t.Error("expected implicitFlowEnabled true")
+	}
+	if capturedPayload.DirectAccessGrantsEnabled {
+		t.Error("expected directAccessGrantsEnabled false")
+	}
+	if !capturedPayload.ConsentRequired {
+		t.Error("expected consentRequired true")
+	}
+	if !capturedPayload.ServiceAccountsEnabled {
+		t.Error("expected serviceAccountsEnabled true")
+	}
+	if _, ok := capturedPayload.Attributes["pkce.code.challenge.method"]; ok {
+		t.Error("expected PKCE attribute removed when pkceEnabled is false")
+	}
+	if capturedPayload.Attributes["client.session.max.lifespan"] != "900" {
+		t.Errorf("expected refresh token lifetime 900, got %s", capturedPayload.Attributes["client.session.max.lifespan"])
+	}
+	if capturedPayload.Attributes["access.token.lifespan"] != "120" {
+		t.Errorf("expected access token lifetime 120, got %s", capturedPayload.Attributes["access.token.lifespan"])
+	}
+	if len(capturedPayload.RedirectURIs) != 1 || capturedPayload.RedirectURIs[0] != "https://new.example.com/callback" {
+		t.Errorf("expected redirectURIs [https://new.example.com/callback], got %v", capturedPayload.RedirectURIs)
 	}
 }
 
