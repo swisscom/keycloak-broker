@@ -27,7 +27,8 @@ curl -sf "$BROKER_URL/v2/service_instances/$INSTANCE_ID" \
     "parameters": {
       "redirectURIs": ["https://myapp.example.com/callback"],
       "pkceEnabled": true,
-      "directAccessGrantsEnabled": true
+      "directAccessGrantsEnabled": true,
+      "refreshTokenLifespan": 699
     }
   }' | jq .
 
@@ -51,6 +52,14 @@ if [ "$PUBLIC" != "true" ]; then
   exit 1
 fi
 echo "PASS: publicClient is true"
+
+# verify refresh token lifespan
+RTL=$(echo "$INSTANCE" | jq -r '.parameters.refreshTokenLifespan')
+if [ "$RTL" != "699" ]; then
+  echo "FAIL: refreshTokenLifespan expected 699, got $RTL"
+  exit 1
+fi
+echo "PASS: refreshTokenLifespan is 699"
 
 echo ""
 echo "=== Creating binding ==="
