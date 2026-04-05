@@ -50,6 +50,75 @@ Defined in `catalog.yaml`. Ships with one service (`corpid`) and two plans:
 | `standard-client` | Confidential | Standard OIDC client with client secret |
 | `public-client` | Public | Public OIDC client (no client secret) |
 
+## Usage
+
+All examples below show the JSON body for `PUT /v2/service_instances/<instance-id>`.
+
+### Authorization Code Grant - `authorization_code`
+
+The most common flow for server-side web applications. The client authenticates with a client secret and exchanges an authorization code for tokens. This is the default for a service instance and thus requires no other parameter.
+
+```json
+{
+  "service_id": "fff5b36a-da19-4dc2-bd28-3dd331146290",
+  "plan_id": "40627d0f-dedd-4d68-8111-2ebae510ba1b",
+  "parameters": {
+    "redirectURIs": ["https://myapp.example.com/callback"]
+  }
+}
+```
+
+Uses the "**standard-client**" plan. The authorization code flow can be controlled via the parameter `standardFlowEnabled`, it is enabled by default and thus optional. PKCE is also enabled by default.
+
+### Authorization Code Grant - `public`
+
+For single-page applications (SPAs) or mobile apps that cannot securely store a client secret. PKCE is also here enabled by default.
+
+```json
+{
+  "service_id": "fff5b36a-da19-4dc2-bd28-3dd331146290",
+  "plan_id": "ece8f4ad-1ba0-481b-94b0-8fb4f066aa38",
+  "parameters": {
+    "redirectURIs": ["https://myapp.example.com/callback"],
+    "pkceEnabled": false
+  }
+}
+```
+
+Uses the "**public-client**" plan. No client secret is issued. PKCE is also enabled by default, and can be disabled by setting `pkceEnabled` to `false`, though this is not recommended.
+
+### Implicit Grant - `implicit`
+
+Legacy flow for SPAs that receive tokens directly from the authorization endpoint. Deprecated in OAuth 2.1, please prefer to use authorization code with PKCE instead.
+
+```json
+{
+  "service_id": "fff5b36a-da19-4dc2-bd28-3dd331146290",
+  "plan_id": "40627d0f-dedd-4d68-8111-2ebae510ba1b",
+  "parameters": {
+    "redirectURIs": ["https://myapp.example.com/callback"],
+    "implicitFlowEnabled": true
+  }
+}
+```
+
+### Client Credentials Grant - `client_credentials`
+
+For service-to-service communication where no user is involved. The client authenticates directly with its client ID and secret to obtain an access token.
+
+```json
+{
+  "service_id": "fff5b36a-da19-4dc2-bd28-3dd331146290",
+  "plan_id": "40627d0f-dedd-4d68-8111-2ebae510ba1b",
+  "parameters": {
+    "standardFlowEnabled": false,
+    "serviceAccountsEnabled": true
+  }
+}
+```
+
+Use the `standard-client` plan (confidential). Disable `standardFlowEnabled` if the client is purely machine-to-machine and does not need the authorization code flow.
+
 ## OSB Parameters
 
 The following parameters can be passed in the `parameters` object when provisioning (PUT) or updating (PATCH) a service instance:
@@ -57,12 +126,14 @@ The following parameters can be passed in the `parameters` object when provision
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `redirectURIs` | `[]string` | `[]` | List of allowed redirect URIs for the OIDC client |
-| `implicitFlowEnabled` | `bool` | `false` | Enable the OAuth 2.0 implicit flow |
-| `directAccessGrantsEnabled` | `bool` | `false` | Enable direct access grants (Resource Owner Password Credentials) |
+| `standardFlowEnabled` | `bool` | `true` | Enable the OAuth 2.0 authorization code flow (`authorization_code` grant) |
+| `implicitFlowEnabled` | `bool` | `false` | Enable the OAuth 2.0 implicit flow (`implicit` grant) |
+| `directAccessGrantsEnabled` | `bool` | `false` | Enable Resource Owner Password Credentials (`direct_access` grant) |
 | `consentRequired` | `bool` | `false` | Require user consent before granting access |
-| `serviceAccountsEnabled` | `bool` | `false` | Enable service accounts (client credentials grant) |
+| `serviceAccountsEnabled` | `bool` | `false` | Enable service accounts (`client_credentials` grant) |
 | `pkceEnabled` | `bool` | `false` | Enable Proof Key for Code Exchange (PKCE) |
-| `refreshTokenLifespan` | `int` | `0` | Refresh token lifespan in seconds (`0` = use Keycloak realm default) |
+| `refreshTokenLifetime` | `int` | `0` | Refresh token lifetime in seconds (`0` = use system default) |
+| `accessTokenLifetime` | `int` | `0` | Access token lifetime in seconds (`0` = use system default) |
 
 On update (PATCH), all parameters are optional. Only provided fields will be merged into the existing client configuration.
 
