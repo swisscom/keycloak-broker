@@ -188,6 +188,12 @@ func TestGetInstance_Found(t *testing.T) {
 	if body.Parameters.AccessTokenLifetime != 300 {
 		t.Errorf("expected accessTokenLifetime 300, got %d", body.Parameters.AccessTokenLifetime)
 	}
+	if body.Parameters.TokenEndpoint == "" {
+		t.Error("expected tokenEndpoint to be populated")
+	}
+	if len(body.Parameters.RedirectURIs) != 1 || body.Parameters.RedirectURIs[0] != "https://myapp.example.com/callback" {
+		t.Errorf("expected redirectURIs [https://myapp.example.com/callback], got %v", body.Parameters.RedirectURIs)
+	}
 }
 
 func TestGetInstance_NotFound(t *testing.T) {
@@ -270,6 +276,9 @@ func TestBindInstance_Success(t *testing.T) {
 	if body.Credentials.TokenEndpoint == "" {
 		t.Error("expected token endpoint in binding credentials")
 	}
+	if len(body.Credentials.RedirectURIs) != 1 || body.Credentials.RedirectURIs[0] != "https://myapp.example.com/callback" {
+		t.Errorf("expected redirectURIs [https://myapp.example.com/callback], got %v", body.Credentials.RedirectURIs)
+	}
 }
 
 func TestUnbindInstance_Success(t *testing.T) {
@@ -325,6 +334,12 @@ func TestKeycloakClientToOSB_MapsAttributes(t *testing.T) {
 	if !osb.Parameters.StandardFlowEnabled {
 		t.Error("expected standardFlowEnabled true")
 	}
+	if osb.Parameters.TokenEndpoint != "https://kc.example.com/realms/test/protocol/openid-connect/token" {
+		t.Errorf("expected tokenEndpoint, got %s", osb.Parameters.TokenEndpoint)
+	}
+	if osb.Parameters.Issuer != "https://kc.example.com/realms/test" {
+		t.Errorf("expected issuer, got %s", osb.Parameters.Issuer)
+	}
 }
 
 func TestKeycloakClientToOSBBinding_MapsCredentials(t *testing.T) {
@@ -348,6 +363,15 @@ func TestKeycloakClientToOSBBinding_MapsCredentials(t *testing.T) {
 	}
 	if binding.Metadata.ServiceId != "svc-1" {
 		t.Errorf("expected serviceId svc-1, got %s", binding.Metadata.ServiceId)
+	}
+	if len(binding.Credentials.RedirectURIs) != 1 || binding.Credentials.RedirectURIs[0] != "https://example.com/cb" {
+		t.Errorf("expected redirectURIs [https://example.com/cb], got %v", binding.Credentials.RedirectURIs)
+	}
+	if binding.Credentials.Issuer != "https://kc.example.com/realms/test" {
+		t.Errorf("expected issuer, got %s", binding.Credentials.Issuer)
+	}
+	if binding.Credentials.TokenEndpoint != "https://kc.example.com/realms/test/protocol/openid-connect/token" {
+		t.Errorf("expected tokenEndpoint, got %s", binding.Credentials.TokenEndpoint)
 	}
 }
 
